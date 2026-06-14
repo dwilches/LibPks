@@ -13,8 +13,9 @@ class PksException : public std::exception {
     std::string message;
 
 public:
-    PksException(const std::string& message);
-    [[nodiscard]] const char* what() const noexcept override;
+    PksException(const std::string &message);
+
+    [[nodiscard]] const char *what() const noexcept override;
 };
 
 

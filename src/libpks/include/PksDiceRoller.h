@@ -7,7 +7,7 @@ struct RolledDice {
     int value;
     bool alreadyUsed;
 
-    bool operator==(const RolledDice& other) const {
+    bool operator==(const RolledDice &other) const {
         return value == other.value && alreadyUsed == other.alreadyUsed;
     }
 };
@@ -25,7 +25,9 @@ class PksDiceRoller {
 
 public:
     PksDiceRoller();
-    PksDiceRoller(const PksDiceRoller&) = default;
+
+    PksDiceRoller(const PksDiceRoller &) = default;
+
     virtual ~PksDiceRoller() = default;
 
     RolledDicePair rollNewPair();

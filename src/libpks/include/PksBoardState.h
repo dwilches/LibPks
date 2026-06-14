@@ -7,7 +7,7 @@
 #include "PksGameState.h"
 
 struct PksBoardState {
-    std::map<PksColor, std::vector<int>> piecesByPlayer;
+    std::map<PksColor, std::vector<int> > piecesByPlayer;
     PksColor currentPlayer;
     PksGameState gameState;
 };
