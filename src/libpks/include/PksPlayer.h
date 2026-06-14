@@ -6,21 +6,15 @@
 #include "PksColor.h"
 
 class PksPlayer {
-    const int numPlayer;
-    const PksColor color;
-
     // Position occupied by each piece.
     std::vector<int> pieces;
 
 public:
-    PksPlayer(int numPlayer, const PksColor &color);
+    PksPlayer();
 
-    int getNumPlayer() const;
+    explicit PksPlayer(const std::vector<int> &pieces);
 
     const std::vector<int> &getPieces() const;
-    void setPieces(const std::vector<int>& newPieces);
-
-    PksColor getColor() const;
 
     int movePiece(int piece, int numSpots);
 
@@ -33,7 +27,6 @@ public:
     bool anyPieceAtHome();
 
     void moveAllPiecesOutOfHome();
-
 };
 
 

@@ -27,28 +27,28 @@ PksColor PksGame::start() {
         throw PksException{"PksGame::start(): can't start a game that has already started."};
     }
 
-    players = {
-        {PksColor::Yellow, {1, PksColor::Yellow}},
-        {PksColor::Red, {2, PksColor::Red}},
-        {PksColor::Green, {3, PksColor::Green}},
-        {PksColor::Blue, {4, PksColor::Blue}},
-    };
+    players.clear();
+    for (auto color: playerColors) {
+        players.insert({color, {}});
+    }
 
     gameState = PksGameState::GameInCourse;
-    currentPlayer = PksColor::Yellow;
-    return players.at(currentPlayer).getColor();
+    return currentPlayer = PksColor::Yellow;
 }
 
 // Useful for tests
 PksColor PksGame::start(const PksBoardState &boardState) {
-    start();
-
-    for (auto &[color, pieces]: boardState.piecesByPlayer) {
-        players.at(color).setPieces(pieces);
+    if (gameState == PksGameState::GameInCourse) {
+        throw PksException{"PksGame::start(): can't start a game that has already started."};
     }
-    currentPlayer = boardState.currentPlayer;
 
-    return boardState.currentPlayer;
+    players.clear();
+    for (const auto &[color, newPieces]: boardState.piecesByPlayer) {
+        players.insert({color, PksPlayer{newPieces}});
+    }
+
+    gameState = PksGameState::GameInCourse;
+    return currentPlayer = boardState.currentPlayer;
 }
 
 void PksGame::stop() {
@@ -153,14 +153,14 @@ void PksGame::moveCurrentPlayerPiece(int piece, int numSpots) {
     // Check if this player's piece has fallen into an unsafe shared spot occupied by other players' pieces, and
     // capture them.
     if (spotType == PksSpotType::UnsafeShared) {
-        for (auto &[otherColor, otherPlayer]: players) {
+        for (const auto &otherColor: playerColors) {
             // Ignore the current player, only interested in other players
             if (otherColor == currentPlayer) {
                 continue;
             }
 
-            int otherPlayersSpot = PksUtils::convertSpotNumber(currentPlayer, otherPlayer.getColor(), newPos);
-            otherPlayer.capturePiecesAt(otherPlayersSpot);
+            int otherPlayersSpot = PksUtils::convertSpotNumber(currentPlayer, otherColor, newPos);
+            players.at(otherColor).capturePiecesAt(otherPlayersSpot);
         }
     }
 }

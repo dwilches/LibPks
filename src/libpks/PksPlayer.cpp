@@ -4,24 +4,14 @@
 #include "PksConstants.h"
 #include "PksException.h"
 
-PksPlayer::PksPlayer(int numPlayer, const PksColor &color)
-    : numPlayer{numPlayer}, color{color}, pieces(NUM_PIECES, HOME_SPOT) {
+PksPlayer::PksPlayer() : PksPlayer{std::vector(NUM_PIECES, HOME_SPOT)} {
 }
 
-int PksPlayer::getNumPlayer() const {
-    return numPlayer;
+PksPlayer::PksPlayer(const std::vector<int> &pieces) : pieces{pieces} {
 }
 
 const std::vector<int> &PksPlayer::getPieces() const {
     return pieces;
-}
-
-void PksPlayer::setPieces(const std::vector<int> &newPieces) {
-    pieces = newPieces;
-}
-
-PksColor PksPlayer::getColor() const {
-    return color;
 }
 
 int PksPlayer::movePiece(int piece, int numSpots) {
