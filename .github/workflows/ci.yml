@@ -5,10 +5,10 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
-  workflow_dispatch:  # Allows manual runs
-
-permissions:
-  contents: write
+  # Allow manual runs
+  workflow_dispatch:
+  # Allow to be invoked from other workflows
+  workflow_call:
 
 jobs:
   build-test-release:
@@ -38,26 +38,3 @@ jobs:
         run: |
           cmake --build build --target sample_app
           ./build/src/apps/sample_app
-
-      - name: Copy libpks build artifacts to dist folder
-        run: |
-          mkdir -p dist
-          cp ./build/src/libpks/liblibpks.a dist/libpks.a
-          
-          mkdir -p dist/include
-          SOURCE_INCLUDE_DIR=src/libpks/include/
-          cp $SOURCE_INCLUDE_DIR/PksGame.h \
-             $SOURCE_INCLUDE_DIR/PksDiceRoller.h \
-             $SOURCE_INCLUDE_DIR/PksGameState.h \
-             $SOURCE_INCLUDE_DIR/PksColor.h \
-             $SOURCE_INCLUDE_DIR/PksRollDiceResult.h \
-             $SOURCE_INCLUDE_DIR/PksSpotType.h \
-             $SOURCE_INCLUDE_DIR/PksBoardState.h \
-             dist/include
-
-          # Push new artifacts to the main branch
-          git config --global user.name "${{ github.actor }}"
-          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
-          git add dist/
-          git commit -m "Automatic artifact update ($(date +'%Y-%m-%d'))"
-          git push
