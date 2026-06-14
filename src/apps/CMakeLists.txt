@@ -1,4 +1,4 @@
 
-add_executable(sampleApp main.cpp)
+add_executable(sample_app main.cpp)
 
-target_link_libraries(sampleApp PRIVATE libpks)
+target_link_libraries(sample_app PRIVATE libpks)

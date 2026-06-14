@@ -4,6 +4,6 @@ C++ implementation of [Parqués](https://en.wikipedia.org/wiki/Parqu%C3%A9s), a 
 
 This repository contains the game logic implementation needed for making a UI game. This project compiles to a C++ library that can then be embedded in UI games.
 
-I'm making this jsut for fun, to practice with the newest C++ features.
+I'm making this just for fun, to practice with the newest C++ features.
 
-This is stil a work in progress.
+This is still a work in progress.
