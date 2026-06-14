@@ -1,4 +1,4 @@
-#include <stdexcept>
+#include <sstream>
 
 #include "PksGame.h"
 
@@ -23,7 +23,9 @@ PksGame::PksGame(PksDiceRoller &diceRoller)
 }
 
 PksColor PksGame::start() {
-    validateGameState("PksGame::start()", PksGameState::GameNotStarted);
+    if (gameState == PksGameState::GameInCourse) {
+        throw PksException{"PksGame::start(): can't start a game that has already started."};
+    }
 
     players = {
         {PksColor::Yellow, {1, PksColor::Yellow}},
@@ -50,14 +52,14 @@ PksColor PksGame::start(const PksBoardState &boardState) {
 }
 
 void PksGame::stop() {
-    validateGameState("PksGame::stop()", PksGameState::GameInCourse);
+    validateGameInCourse("PksGame::stop()");
 
     players.clear();
     gameState = PksGameState::GameNotStarted;
 }
 
 std::pair<RolledDice, RolledDice> PksGame::rollDice() {
-    validateGameState("PksGame::rollDice()", PksGameState::GameInCourse);
+    validateGameInCourse("PksGame::rollDice()");
 
     // Only roll the dice again if the previous one was already used
     if (lastRollDiceResult && lastRollDiceResult->canUseDiceRoll && !lastRollDiceResult->diceRoll.allDiceUsed()) {
@@ -108,7 +110,7 @@ void PksGame::nextPlayer() {
 }
 
 PksColor PksGame::useDice(const int diceValue, const int numPiece) {
-    validateGameState("PksGame::useDice()", PksGameState::GameInCourse);
+    validateGameInCourse("PksGame::useDice()");
 
     if (numPiece < 0 || numPiece >= NUM_PIECES) {
         throw PksException{
@@ -116,9 +118,8 @@ PksColor PksGame::useDice(const int diceValue, const int numPiece) {
         };
     }
 
-    lastRollDiceResult->markDiceAsUsed(diceValue);
-
     moveCurrentPlayerPiece(numPiece, diceValue);
+    lastRollDiceResult->markDiceAsUsed(diceValue);
 
     if (lastRollDiceResult->diceRoll.allDiceUsed() && !lastRollDiceResult->canRollAgain) {
         nextPlayer();
@@ -135,18 +136,18 @@ PksBoardState PksGame::getCurrentBoardState() const {
     return {
         .piecesByPlayer = allPieces,
         .currentPlayer = currentPlayer,
+        .gameState = gameState
     };
 }
 
 void PksGame::moveCurrentPlayerPiece(int piece, int numSpots) {
-    validateGameState("PksGame::movePiece()", PksGameState::GameInCourse);
-
     // New position in player local numbering
     int newPos = players.at(currentPlayer).movePiece(piece, numSpots);
 
     const auto spotType = getSpotType(newPos);
     if (spotType == PksSpotType::Goal && players.at(currentPlayer).allPiecesAtTarget()) {
-        gameState = PksGameState::GameNotStarted;
+        gameState = PksGameState::GameOver;
+        return;
     }
 
     // Check if this player's piece has fallen into an unsafe shared spot occupied by other players' pieces, and
@@ -195,20 +196,12 @@ PksSpotType PksGame::getSpotType(int spot) {
     return PksSpotType::UnsafeShared;
 }
 
-void PksGame::validateGameState(const std::string &methodName, const PksGameState expectedState) const {
-    if (expectedState == gameState) {
+void PksGame::validateGameInCourse(const std::string &methodName) const {
+    if (gameState == PksGameState::GameInCourse) {
         return;
     }
 
-    switch (expectedState) {
-        case PksGameState::GameNotStarted:
-            throw PksException{methodName + ": Expected the game to not be started"};
-        case PksGameState::GameInCourse:
-            throw PksException{methodName + ": Expected the game to be in course"};
-    }
-
-    // Should never get here as the switch above needs to be exhaustive
-    throw std::runtime_error{
-        methodName + ": Unexpected game state: " + std::to_string(static_cast<int>(expectedState))
-    };
+    std::ostringstream oss;
+    oss << methodName << ": Expected game to be in course, but it was [ " << gameState << "]";
+    throw PksException{oss.str()};
 }

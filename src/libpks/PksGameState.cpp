@@ -8,6 +8,8 @@ std::ostream &operator<<(std::ostream &os, const PksGameState &color) {
             break;
         case PksGameState::GameNotStarted: os << "GameNotStarted";
             break;
+        case PksGameState::GameOver: os << "GameOver";
+            break;
         default: os << "Unknown";
             break;
     }

@@ -4,7 +4,7 @@
 #include <iosfwd>
 
 enum class PksGameState {
-    GameNotStarted, GameInCourse
+    GameNotStarted, GameInCourse, GameOver
 };
 
 std::ostream &operator<<(std::ostream &, const PksGameState &);

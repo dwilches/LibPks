@@ -35,11 +35,13 @@ class PksGame {
     int numConsecutiveDiceRolls;
     std::unique_ptr<PksRollDiceResult> lastRollDiceResult;
 
-    void validateGameState(const std::string &methodName, PksGameState expectedState) const;
+    void validateGameInCourse(const std::string &methodName) const;
 
     void moveCurrentPlayerPiece(int piece, int numSpots);
 
     static PksSpotType getSpotType(int spot);
+
+    void nextPlayer();
 
 public:
     // TODO: PksGame();
@@ -53,8 +55,6 @@ public:
     void stop();
 
     std::pair<RolledDice, RolledDice> rollDice();
-
-    void nextPlayer();
 
     PksColor useDice(int diceValue, int numPiece);
 

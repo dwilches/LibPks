@@ -4,10 +4,12 @@
 #include <vector>
 
 #include "PksColor.h"
+#include "PksGameState.h"
 
 struct PksBoardState {
     std::map<PksColor, std::vector<int>> piecesByPlayer;
     PksColor currentPlayer;
+    PksGameState gameState;
 };
 
 #endif //LIBPKS_PKSBOARDSTATE_H
