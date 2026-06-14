@@ -1,11 +1,13 @@
 #include <algorithm>
 #include "PksPlayer.h"
 
+#include "PksConstants.h"
+
 #define GOAL_POSITION 71
 #define HOME_POSITION -1
 
 PksPlayer::PksPlayer(int numPlayer, const PksColor &color)
-    : numPlayer{numPlayer}, color{color}, pieces(6, HOME_POSITION) {
+    : numPlayer{numPlayer}, color{color}, pieces(NUM_PIECES, HOME_POSITION) {
 }
 
 int PksPlayer::getNumPlayer() const {

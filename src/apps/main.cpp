@@ -1,24 +1,40 @@
 #include <iostream>
 #include <ostream>
 
-#include "../libpks/include/PksGame.h"
-#include "../libpks/include/PksDebug.h"
+#include "PksGame.h"
+
+void printPositions(const std::vector<int> &);
 
 int main() {
-    PksGame game;
-    PksColor currentPlayer = game.start();
-    std::cout << "currentPlayer " << currentPlayer << std::endl << std::endl;
+    std::cout << "/**" << std::endl;
+    std::cout << " * This is a sample interaction with libpks." << std::endl;
+    std::cout << " * This library can be used as the brain of your UI Parques implementations." << std::endl;
+    std::cout << " */" << std::endl << std::endl;
 
-    auto rollResult = game.rollDice();
-    std::cout << "Roll Result is: " << *rollResult << std::endl << std::endl;
+    PksDiceRoller roller;
+    PksGame game{roller};
+    const PksColor currentPlayer = game.start();
+    std::cout << "CurrentPlayer is " << currentPlayer << std::endl;
 
-    std::cout << "Using dice 1: " << rollResult->diceRoll.dicePair.first.value << std::endl;
-    auto nextPlayer = game.useDice(rollResult->diceRoll.dicePair.first.value, 0);
-    std::cout << "nextPlayer=" << nextPlayer << std::endl << std::endl;
+    std::cout << "This player's pieces are all at home (-1 is Home): " << std::endl;
+    printPositions(game.getCurrentBoardState().piecesByPlayer[currentPlayer]);
 
-    std::cout << "Using dice 2:" << rollResult->diceRoll.dicePair.second.value << std::endl;
-    nextPlayer = game.useDice(rollResult->diceRoll.dicePair.second.value, 1);
-    std::cout << "nextPlayer=" << nextPlayer << std::endl << std::endl;
+    std::cout << std::endl << "Rolling some dice" << std::endl;
+    auto [dice1, dice2] = game.rollDice();
+    std::cout << "Roll Result is: (" << dice1.value << "," << dice2.value << ")" << std::endl << std::endl;
 
-    game.rollDice();
+    if (dice1.value == dice2.value) {
+        std::cout << "How lucky, we got doubles. We get out of Home" << std::endl;
+    } else {
+        std::cout << "We didn't get doubles, so we can't go out of Home." << std::endl;
+    }
+
+    std::cout << "New piece positions: " << std::endl;
+    printPositions(game.getCurrentBoardState().piecesByPlayer[currentPlayer]);;
+}
+
+void printPositions(const std::vector<int> &piecePositions) {
+    for (int i = 0; i < piecePositions.size(); i++) {
+        std::cout << "Piece [" << i << "] = " << piecePositions[i] << std::endl;
+    }
 }

@@ -2,7 +2,6 @@
 #define PKSLIB_LIBRARY_H
 
 #include <memory>
-#include <vector>
 
 #include "PksDiceRoller.h"
 #include "PksPlayer.h"
@@ -10,7 +9,6 @@
 #include "PksBoardState.h"
 #include "PksGameState.h"
 #include "PksSpotType.h"
-
 
 /**
  * Every Parqués piece can be in one of 73 different spots. To simplify the implementation, I chose these numbers for
@@ -45,7 +43,7 @@ class PksGame {
 
 public:
     // TODO: PksGame();
-    PksGame(PksDiceRoller &diceRoller); // Useful for testing
+    explicit PksGame(PksDiceRoller &diceRoller); // Useful for testing
 
     PksColor start();
 
