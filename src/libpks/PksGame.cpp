@@ -10,7 +10,7 @@
 #include "PksSpotType.h"
 #include "PksUtils.h"
 
-const PksColor playerColors[] = {
+static constexpr PksColor playerColors[] = {
     PksColor::Yellow, PksColor::Red, PksColor::Green, PksColor::Blue,
 };
 
@@ -76,8 +76,12 @@ std::pair<RolledDice, RolledDice> PksGame::rollDice() {
     bool canUseDiceRoll;
     if (diceRoll.isDoubles) {
         if (players.at(currentPlayer).anyPieceAtHome()) {
-            // Implicitly use the dice roll to get our of Home/Jail
+            // Implicitly use the dice roll to get our of Home
             players.at(currentPlayer).moveAllPiecesOutOfHome();
+
+            // Capture all pieces that were walking by our Home
+            moveHomeAllPiecesAtSpot(START_SPOT);
+
             canUseDiceRoll = false;
             nextPlayer();
         } else {
@@ -153,26 +157,23 @@ void PksGame::moveCurrentPlayerPiece(int piece, int numSpots) {
     // Check if this player's piece has fallen into an unsafe shared spot occupied by other players' pieces, and
     // capture them.
     if (spotType == PksSpotType::UnsafeShared) {
-        for (const auto &otherColor: playerColors) {
-            // Ignore the current player, only interested in other players
-            if (otherColor == currentPlayer) {
-                continue;
-            }
-
-            int otherPlayersSpot = PksUtils::convertSpotNumber(currentPlayer, otherColor, newPos);
-            players.at(otherColor).capturePiecesAt(otherPlayersSpot);
-        }
+        moveHomeAllPiecesAtSpot(newPos);
     }
 }
 
-/**
- * Gets the type of spot based on its number. Spots have numbers only from the perspective of players, there is no
- * global numbering.
- *
- * @param spot Spot identifier in player local numbering.
- * @return the type of spot.
- */
-PksSpotType PksGame::getSpotType(int spot) {
+void PksGame::moveHomeAllPiecesAtSpot(const int spot) {
+    for (const auto &otherColor: playerColors) {
+        // Ignore the current player, only interested in other players
+        if (otherColor == currentPlayer) {
+            continue;
+        }
+
+        const int otherPlayersSpot = PksUtils::convertSpotNumber(currentPlayer, otherColor, spot);
+        players.at(otherColor).movePiecesHomeIfAtSpot(otherPlayersSpot);
+    }
+}
+
+PksSpotType PksGame::getSpotType(const int spot) {
     // Initial spot, treated as both Home and Jail
     if (spot == -1) { return PksSpotType::Home; }
 

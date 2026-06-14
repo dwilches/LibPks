@@ -6,6 +6,11 @@
 // pieces into play.
 #define HOME_SPOT (-1)
 
+// When a piece moves out of the Home, it moves to this spot. This is the first of the shared spots, but it's a safe
+// spot. Anyway, if there was any foreign piece at this position when the pieces leave home, those foreign pieces
+// are captured and returned to their respective homes.
+#define START_SPOT 0
+
 // There are a total of 68 shared spots, which are divided in 4 "quadrants" each of 17 spots
 #define TOTAL_SHARED_SPOTS 68
 

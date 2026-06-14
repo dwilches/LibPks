@@ -39,6 +39,11 @@ class PksGame {
 
     void moveCurrentPlayerPiece(int piece, int numSpots);
 
+    // Moves all pieces at this spot home, except the pieces of the current player
+    void moveHomeAllPiecesAtSpot(int spot);
+
+    // Gets the type of spot to determine if it's a safe/unsafe/shared spot.
+    // Spots have numbers only from the perspective of players, there is no global numbering.
     static PksSpotType getSpotType(int spot);
 
     void nextPlayer();

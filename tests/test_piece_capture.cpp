@@ -1,6 +1,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "MockDiceRoller.h"
+#include "PksConstants.h"
 #include "PksGame.h"
 #include "PksUtils.h"
 #include "src/TestBoards.h"
@@ -136,4 +137,29 @@ TEST_CASE("Cannot capture pieces in safe spots") {
     const int yellowSpot = currentState.piecesByPlayer[PksColor::Yellow][0];
     const int redSpot = currentState.piecesByPlayer[PksColor::Red][0];
     REQUIRE(PksUtils::convertSpotNumber(PksColor::Yellow, PksColor::Red, yellowSpot) == redSpot);
+}
+
+TEST_CASE("When going out of Home, capture foreign pieces currently at our Home") {
+    MockDiceRoller mockDiceRoller;
+    PksGame game{mockDiceRoller};
+
+    PksBoardState initialBoard = {
+        .piecesByPlayer = {
+                {PksColor::Yellow, {0, 0, 0, HOME_SPOT}},
+                {PksColor::Red, {51, 0, 0, 0}},
+                {PksColor::Green, {0, 0, 0, 0}},
+                {PksColor::Blue, {0, 0, 0, 0}},
+            },
+            .currentPlayer = PksColor::Yellow,
+        };
+    REQUIRE(game.start(initialBoard) == PksColor::Yellow);
+
+    // Roll doubles to get out of home
+    mockDiceRoller.setNextRandomValues(2, 2);
+    game.rollDice();
+
+    // All pieces at our home should have been captured
+    auto currentState = game.getCurrentBoardState();
+    REQUIRE(currentState.piecesByPlayer[PksColor::Yellow] == std::vector{0, 0, 0, 0}); // piece got out of home
+    REQUIRE(currentState.piecesByPlayer[PksColor::Red] == std::vector{HOME_SPOT, 0, 0, 0}); // foreign piece sent home
 }
