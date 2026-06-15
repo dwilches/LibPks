@@ -11,12 +11,7 @@ TEST_CASE("Can roll and use dice (when not at home)") {
 
     // The current player is not at Home
     PksBoardState initialBoard = {
-        .piecesByPlayer = {
-            {PksColor::Yellow, {0, 0, 0, 0}},
-            {PksColor::Red, {-1, -1, -1, -1}},
-            {PksColor::Green, {-1, -1, -1, -1}},
-            {PksColor::Blue, {-1, -1, -1, -1}},
-        },
+        .piecesByPlayer = TestBoards::allPiecesAtStart(),
         .currentPlayer = PksColor::Yellow,
     };
     REQUIRE(game.start(initialBoard) == PksColor::Yellow);
@@ -129,12 +124,7 @@ TEST_CASE("Can roll doubles (when not at home)") {
     PksGame game{mockDiceRoller};
 
     PksBoardState initialBoard = {
-        .piecesByPlayer = {
-            {PksColor::Yellow, {0, 0, 0, 0}},
-            {PksColor::Red, {-1, -1, -1, -1}},
-            {PksColor::Green, {-1, -1, -1, -1}},
-            {PksColor::Blue, {-1, -1, -1, -1}},
-        },
+        .piecesByPlayer = TestBoards::allPiecesAtStart(),
         .currentPlayer = PksColor::Yellow,
     };
     REQUIRE(game.start(initialBoard) == PksColor::Yellow);
@@ -165,12 +155,7 @@ TEST_CASE("Can roll doubles many times") {
     PksGame game{mockDiceRoller};
 
     PksBoardState initialBoard = {
-        .piecesByPlayer = {
-            {PksColor::Yellow, {0, 0, 0, 0}},
-            {PksColor::Red, {-1, -1, -1, -1}},
-            {PksColor::Green, {-1, -1, -1, -1}},
-            {PksColor::Blue, {-1, -1, -1, -1}},
-        },
+        .piecesByPlayer = TestBoards::allPiecesAtStart(),
         .currentPlayer = PksColor::Yellow,
     };
     REQUIRE(game.start(initialBoard) == PksColor::Yellow);

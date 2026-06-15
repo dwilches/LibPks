@@ -120,7 +120,8 @@ PksColor PksGame::useDice(const int diceValue, const int numPiece) {
     moveCurrentPlayerPiece(numPiece, diceValue);
     lastRollDiceResult->markDiceAsUsed(diceValue);
 
-    if (lastRollDiceResult->allDiceUsed() && !(lastRollDiceResult->isDoubles() && numConsecutiveDiceRolls != MAX_DICE_ROLLS)) {
+    const bool canRollAgain = lastRollDiceResult->isDoubles() && numConsecutiveDiceRolls != MAX_DICE_ROLLS;
+    if (lastRollDiceResult->allDiceUsed() && !canRollAgain) {
         nextPlayer();
     }
 

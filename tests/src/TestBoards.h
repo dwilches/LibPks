@@ -8,13 +8,10 @@
 
 typedef std::map<PksColor, std::vector<int> > TestBoard;
 
-class TestBoards {
-public:
-    TestBoards() = delete;
+namespace TestBoards {
+    TestBoard allPiecesAtHome();
 
-    static TestBoard allPiecesAtHome();
-
-    static TestBoard allPiecesAtStart();
+    TestBoard allPiecesAtStart();
 };
 
 #endif //LIBPKS_TESTBOARDS_H
