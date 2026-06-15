@@ -19,8 +19,8 @@ TEST_CASE("All pieces move out of home") {
     // Roll doubles to get out of home
     mockDiceRoller.setNextRandomValues(6, 6);
     auto diceRoll = game.rollDice();
-    REQUIRE(diceRoll.first == RolledDice{.value=6, .alreadyUsed=true}); // used to get out of home
-    REQUIRE(diceRoll.second == RolledDice{.value=6, .alreadyUsed=true});
+    REQUIRE(diceRoll.allDiceUsed()); // used to get out of home
+    REQUIRE(diceRoll.getDice() == std::pair{6, 6});
     REQUIRE(game.getCurrentBoardState().piecesByPlayer[PksColor::Yellow] == std::vector{0, 0, 0, 0}); // all at start
 
     // Next player's turn
@@ -49,7 +49,7 @@ TEST_CASE("Pieces move according to dice value (same piece moves both dice)") {
 
     // Roll a dice and ensure the pieces move the desired amounts
     mockDiceRoller.setNextRandomValues(6, 3);
-    auto diceRoll = game.rollDice();
+    game.rollDice();
     REQUIRE(game.getCurrentBoardState().piecesByPlayer[PksColor::Yellow] == std::vector{0, 10, 20, 30});
 
     game.useDice(6, 1); // Should move from 10 to 16

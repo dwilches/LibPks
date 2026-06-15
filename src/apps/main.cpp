@@ -1,5 +1,6 @@
 #include <iostream>
 #include <ostream>
+#include <vector>
 
 #include "PksGame.h"
 
@@ -20,10 +21,10 @@ int main() {
     printPositions(game.getCurrentBoardState().piecesByPlayer[currentPlayer]);
 
     std::cout << std::endl << "Rolling some dice" << std::endl;
-    auto [dice1, dice2] = game.rollDice();
-    std::cout << "Roll Result is: (" << dice1.value << "," << dice2.value << ")" << std::endl << std::endl;
+    auto [dice1, dice2] = game.rollDice().getDice();
+    std::cout << "Roll Result is: (" << dice1 << "," << dice2 << ")" << std::endl << std::endl;
 
-    if (dice1.value == dice2.value) {
+    if (dice1 == dice2) {
         std::cout << "How lucky, we got doubles. We get out of Home" << std::endl;
     } else {
         std::cout << "We didn't get doubles, so we can't go out of Home." << std::endl;

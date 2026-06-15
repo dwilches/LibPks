@@ -1,11 +1,10 @@
-
 #include <sstream>
 
 #include "PksUtils.h"
 #include "PksConstants.h"
 #include "PksException.h"
 
-int PksUtils::convertSpotNumber(const PksColor &from, const PksColor &to, int spot) {
+int PksUtils::convertSpotNumber(const PksColor &from, const PksColor &to, const int spot) {
     //region Validations
     if (spot < 0 || spot > LAST_SHARED_SPOT) {
         throw PksException{

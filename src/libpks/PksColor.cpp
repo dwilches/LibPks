@@ -1,7 +1,6 @@
+#include <iostream>
 
 #include "PksColor.h"
-
-#include <iostream>
 
 std::ostream &operator<<(std::ostream &os, const PksColor &color) {
     switch (color) {

@@ -3,22 +3,6 @@
 
 #include <random>
 
-struct RolledDice {
-    int value;
-    bool alreadyUsed;
-
-    bool operator==(const RolledDice &other) const {
-        return value == other.value && alreadyUsed == other.alreadyUsed;
-    }
-};
-
-struct RolledDicePair {
-    std::pair<RolledDice, RolledDice> dicePair;
-    bool isDoubles;
-
-    bool allDiceUsed() const;
-};
-
 class PksDiceRoller {
     std::default_random_engine generator;
     std::uniform_int_distribution<> distribution;
@@ -26,11 +10,9 @@ class PksDiceRoller {
 public:
     PksDiceRoller();
 
-    PksDiceRoller(const PksDiceRoller &) = default;
-
     virtual ~PksDiceRoller() = default;
 
-    RolledDicePair rollNewPair();
+    std::pair<int, int> rollNewPair();
 
     // Useful for mocking in tests
     virtual int nextRandomNumber();

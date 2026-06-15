@@ -7,6 +7,7 @@ add_library(libpks STATIC
         PksColor.cpp
         PksUtils.cpp
         PksGameState.cpp
+        PksDiceResult.cpp
 )
 
 target_include_directories(libpks

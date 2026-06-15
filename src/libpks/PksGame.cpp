@@ -58,11 +58,11 @@ void PksGame::stop() {
     gameState = PksGameState::GameNotStarted;
 }
 
-std::pair<RolledDice, RolledDice> PksGame::rollDice() {
+PksDiceResult PksGame::rollDice() {
     validateGameInCourse("PksGame::rollDice()");
 
     // Only roll the dice again if the previous one was already used
-    if (lastRollDiceResult && lastRollDiceResult->canUseDiceRoll && !lastRollDiceResult->diceRoll.allDiceUsed()) {
+    if (lastRollDiceResult && !lastRollDiceResult->allDiceUsed()) {
         throw PksException{
             "PksGame::rollDice(): can't roll a new dice until all previous dice have been used."
         };
@@ -70,41 +70,36 @@ std::pair<RolledDice, RolledDice> PksGame::rollDice() {
 
     // Execute through a pointer for the polymorphic behaviour required by mocks in tests
     auto diceRoll = (&diceRoller)->rollNewPair();
+
+    lastRollDiceResult = std::make_unique<PksDiceResult>(PksDiceResult{diceRoll});
     numConsecutiveDiceRolls++;
 
     // If the player doesn't have any piece at play, they need doubles before being allowed to use the dice
-    bool canUseDiceRoll;
-    if (diceRoll.isDoubles) {
+    if (lastRollDiceResult->isDoubles()) {
         if (players.at(currentPlayer).anyPieceAtHome()) {
             // Implicitly use the dice roll to get our of Home
             players.at(currentPlayer).moveAllPiecesOutOfHome();
+            // The dice roll cannot be used for anything else
+            lastRollDiceResult->setDiceCannotBeUsed();
 
             // Capture all pieces that were walking by our Home
             moveHomeAllPiecesAtSpot(START_SPOT);
 
-            canUseDiceRoll = false;
             nextPlayer();
-        } else {
-            canUseDiceRoll = true;
         }
     } else {
         // Can only use a non-doubles roll if there is at least 1 piece in play
-        canUseDiceRoll = !players.at(currentPlayer).allPlayingPiecesAtHome();
+        if (players.at(currentPlayer).allPlayingPiecesAtHome()) {
+            lastRollDiceResult->setDiceCannotBeUsed();
+        }
 
         if (numConsecutiveDiceRolls == MAX_DICE_ROLLS) {
             nextPlayer();
         }
     }
 
-    diceRoll.dicePair.first.alreadyUsed = !canUseDiceRoll;
-    diceRoll.dicePair.second.alreadyUsed = !canUseDiceRoll;
-
-    lastRollDiceResult = std::make_unique<PksRollDiceResult>(PksRollDiceResult{
-        .diceRoll = diceRoll,
-        .canUseDiceRoll = canUseDiceRoll,
-        .canRollAgain = diceRoll.isDoubles && numConsecutiveDiceRolls != MAX_DICE_ROLLS,
-    });
-    return diceRoll.dicePair;
+    // Return a copy of the dice result (we don't want the user to tamper with our library's internals)
+    return *lastRollDiceResult;
 }
 
 void PksGame::nextPlayer() {
@@ -125,7 +120,7 @@ PksColor PksGame::useDice(const int diceValue, const int numPiece) {
     moveCurrentPlayerPiece(numPiece, diceValue);
     lastRollDiceResult->markDiceAsUsed(diceValue);
 
-    if (lastRollDiceResult->diceRoll.allDiceUsed() && !lastRollDiceResult->canRollAgain) {
+    if (lastRollDiceResult->allDiceUsed() && !(lastRollDiceResult->isDoubles() && numConsecutiveDiceRolls != MAX_DICE_ROLLS)) {
         nextPlayer();
     }
 
@@ -146,7 +141,7 @@ PksBoardState PksGame::getCurrentBoardState() const {
 
 void PksGame::moveCurrentPlayerPiece(int piece, int numSpots) {
     // New position in player local numbering
-    int newPos = players.at(currentPlayer).movePiece(piece, numSpots);
+    const int newPos = players.at(currentPlayer).movePiece(piece, numSpots);
 
     const auto spotType = getSpotType(newPos);
     if (spotType == PksSpotType::Goal && players.at(currentPlayer).allPiecesAtTarget()) {
@@ -175,7 +170,7 @@ void PksGame::moveHomeAllPiecesAtSpot(const int spot) {
 
 PksSpotType PksGame::getSpotType(const int spot) {
     // Initial spot, treated as both Home and Jail
-    if (spot == -1) { return PksSpotType::Home; }
+    if (spot == HOME_SPOT) { return PksSpotType::Home; }
 
     // Private stair, when the player gets here its pieces can't be eaten
     if (spot >= 63 && spot <= 70) {
@@ -183,7 +178,7 @@ PksSpotType PksGame::getSpotType(const int spot) {
     }
 
     // Final spot, a piece can't move anymore after it has reached the target
-    if (spot == 71) {
+    if (spot == FINAL_TARGET_SPOT) {
         return PksSpotType::Goal;
     }
 

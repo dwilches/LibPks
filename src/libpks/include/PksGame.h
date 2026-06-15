@@ -5,7 +5,7 @@
 
 #include "PksDiceRoller.h"
 #include "PksPlayer.h"
-#include "PksRollDiceResult.h"
+#include "PksDiceResult.h"
 #include "PksBoardState.h"
 #include "PksGameState.h"
 #include "PksSpotType.h"
@@ -33,7 +33,7 @@ class PksGame {
     PksGameState gameState;
     PksColor currentPlayer;
     int numConsecutiveDiceRolls;
-    std::unique_ptr<PksRollDiceResult> lastRollDiceResult;
+    std::unique_ptr<PksDiceResult> lastRollDiceResult;
 
     void validateGameInCourse(const std::string &methodName) const;
 
@@ -49,8 +49,8 @@ class PksGame {
     void nextPlayer();
 
 public:
-    // TODO: PksGame();
-    explicit PksGame(PksDiceRoller &diceRoller); // Useful for testing
+    // Used for testing. Allows mocking the Dice Roller to give the dice values the tests expect.
+    explicit PksGame(PksDiceRoller &diceRoller);
 
     PksColor start();
 
@@ -59,11 +59,11 @@ public:
 
     void stop();
 
-    std::pair<RolledDice, RolledDice> rollDice();
+    PksDiceResult rollDice();
 
     PksColor useDice(int diceValue, int numPiece);
 
-    PksBoardState getCurrentBoardState() const;
+    [[nodiscard]] PksBoardState getCurrentBoardState() const;
 };
 
 #endif // PKSLIB_LIBRARY_H
