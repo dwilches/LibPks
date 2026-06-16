@@ -42,9 +42,6 @@ class PksGame {
     // Moves all pieces at this spot home, except the pieces of the current player
     void moveHomeAllPiecesAtSpot(int spot);
 
-    // Gets the type of spot to determine if it's a safe/unsafe/shared spot.
-    // Spots have numbers only from the perspective of players, there is no global numbering.
-    static PksSpotType getSpotType(int spot);
 
     void nextPlayer();
 
@@ -52,16 +49,16 @@ public:
     // Used for testing. Allows mocking the Dice Roller to give the dice values the tests expect.
     explicit PksGame(PksDiceRoller &diceRoller);
 
-    PksColor start();
+    PksBoardState start();
 
     // Useful for tests
-    PksColor start(const PksBoardState &boardState);
+    PksBoardState start(const PksBoardState &boardState);
 
     void stop();
 
     PksDiceResult rollDice();
 
-    PksColor useDice(int diceValue, int numPiece);
+    PksBoardState useDice(int diceValue, int numPiece);
 
     [[nodiscard]] PksBoardState getCurrentBoardState() const;
 };

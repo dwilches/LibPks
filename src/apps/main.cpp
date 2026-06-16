@@ -14,11 +14,11 @@ int main() {
 
     PksDiceRoller roller;
     PksGame game{roller};
-    const PksColor currentPlayer = game.start();
-    std::cout << "CurrentPlayer is " << currentPlayer << std::endl;
+    const PksBoardState gameState = game.start();
+    std::cout << "CurrentPlayer is " << gameState.currentPlayer << std::endl;
 
     std::cout << "This player's pieces are all at home (-1 is Home): " << std::endl;
-    printPositions(game.getCurrentBoardState().piecesByPlayer[currentPlayer]);
+    printPositions(gameState.piecesByPlayer.at(gameState.currentPlayer));
 
     std::cout << std::endl << "Rolling some dice" << std::endl;
     auto [dice1, dice2] = game.rollDice().getDice();
@@ -31,7 +31,7 @@ int main() {
     }
 
     std::cout << "New piece positions: " << std::endl;
-    printPositions(game.getCurrentBoardState().piecesByPlayer[currentPlayer]);;
+    printPositions(gameState.piecesByPlayer.at(gameState.currentPlayer));
 }
 
 void printPositions(const std::vector<int> &piecePositions) {

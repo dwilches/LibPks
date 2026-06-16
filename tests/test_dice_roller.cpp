@@ -14,7 +14,8 @@ TEST_CASE("Can roll and use dice (when not at home)") {
         .piecesByPlayer = TestBoards::allPiecesAtStart(),
         .currentPlayer = PksColor::Yellow,
     };
-    REQUIRE(game.start(initialBoard) == PksColor::Yellow);
+    auto gameState = game.start(initialBoard);
+    REQUIRE(gameState.currentPlayer == PksColor::Yellow);
 
     // Roll a "random" dice
     mockDiceRoller.setNextRandomValues(2, 3);
@@ -29,12 +30,12 @@ TEST_CASE("Can roll and use dice (when not at home)") {
     CHECK_THROWS(game.useDice(1, 0));
 
     // Use a good dice
-    REQUIRE(game.useDice(2, 0) == PksColor::Yellow);
-    REQUIRE(game.getCurrentBoardState().currentPlayer == PksColor::Yellow);
+    gameState = game.useDice(2, 0);
+    REQUIRE(gameState.currentPlayer == PksColor::Yellow);
 
     // And then the other
-    REQUIRE(game.useDice(3, 0) == PksColor::Red); // the player changes
-    REQUIRE(game.getCurrentBoardState().currentPlayer == PksColor::Red);
+    gameState = game.useDice(3, 0);
+    REQUIRE(gameState.currentPlayer == PksColor::Red); // the player changes
 }
 
 TEST_CASE("Can't get out of home without doubles") {
@@ -46,7 +47,8 @@ TEST_CASE("Can't get out of home without doubles") {
         .piecesByPlayer = TestBoards::allPiecesAtHome(),
         .currentPlayer = PksColor::Yellow,
     };
-    REQUIRE(game.start(initialBoard) == PksColor::Yellow);
+    auto gameState = game.start(initialBoard);
+    REQUIRE(gameState.currentPlayer == PksColor::Yellow);
 
     // Roll a "random" dice
     mockDiceRoller.setNextRandomValues(2, 3);
@@ -79,7 +81,8 @@ TEST_CASE("Can get out of home with doubles (all pieces at home)") {
         .piecesByPlayer = TestBoards::allPiecesAtHome(),
         .currentPlayer = PksColor::Yellow,
     };
-    REQUIRE(game.start(initialBoard) == PksColor::Yellow);
+    auto gameState = game.start(initialBoard);
+    REQUIRE(gameState.currentPlayer == PksColor::Yellow);
 
     // Roll a "random" dice
     mockDiceRoller.setNextRandomValues(2, 2);
@@ -97,14 +100,15 @@ TEST_CASE("Can get out of home with doubles (only some pieces at home)") {
 
     PksBoardState initialBoard = {
         .piecesByPlayer = {
-                {PksColor::Yellow, {0, 0, 0, 0}},
-                {PksColor::Red, {0, 0, 0, 0}},
-                {PksColor::Green, {1, -1, 1, 1}},
-                {PksColor::Blue, {0, 0, 0, 0}},
-            },
+            {PksColor::Yellow, {0, 0, 0, 0}},
+            {PksColor::Red, {0, 0, 0, 0}},
+            {PksColor::Green, {1, -1, 1, 1}},
+            {PksColor::Blue, {0, 0, 0, 0}},
+        },
         .currentPlayer = PksColor::Green,
     };
-    REQUIRE(game.start(initialBoard) == PksColor::Green);
+    auto gameState = game.start(initialBoard);
+    REQUIRE(gameState.currentPlayer == PksColor::Green);
 
     // Roll a "random" dice
     mockDiceRoller.setNextRandomValues(2, 2);
@@ -112,11 +116,11 @@ TEST_CASE("Can get out of home with doubles (only some pieces at home)") {
     REQUIRE(diceRoll.allDiceUsed()); // used to get out of home
     REQUIRE(diceRoll.getDice() == std::pair{2, 2});
 
-    auto currentState = game.getCurrentBoardState();
-    REQUIRE(currentState.piecesByPlayer[PksColor::Green] == std::vector{1, 0, 1, 1}); // got out of home
+    gameState = game.getCurrentBoardState();
+    REQUIRE(gameState.piecesByPlayer[PksColor::Green] == std::vector{1, 0, 1, 1}); // got out of home
 
     // Next player's turn
-    REQUIRE(currentState.currentPlayer == PksColor::Blue);
+    REQUIRE(gameState.currentPlayer == PksColor::Blue);
 }
 
 TEST_CASE("Can roll doubles (when not at home)") {
@@ -127,7 +131,8 @@ TEST_CASE("Can roll doubles (when not at home)") {
         .piecesByPlayer = TestBoards::allPiecesAtStart(),
         .currentPlayer = PksColor::Yellow,
     };
-    REQUIRE(game.start(initialBoard) == PksColor::Yellow);
+    auto gameState = game.start(initialBoard);
+    REQUIRE(gameState.currentPlayer == PksColor::Yellow);
 
     // Roll a "random" dice
     mockDiceRoller.setNextRandomValues(4, 4);
@@ -142,12 +147,13 @@ TEST_CASE("Can roll doubles (when not at home)") {
     CHECK_THROWS(game.useDice(1, 0));
 
     // Use a good dice
-    REQUIRE(game.useDice(4, 0) == PksColor::Yellow);
-    REQUIRE(game.getCurrentBoardState().currentPlayer == PksColor::Yellow);
+    gameState = game.useDice(4, 0);
+    REQUIRE(gameState.currentPlayer == PksColor::Yellow);
 
     // And then the other
-    REQUIRE(game.useDice(4, 0) == PksColor::Yellow); // the player doesn't change, they need to roll again
-    REQUIRE(game.getCurrentBoardState().currentPlayer == PksColor::Yellow); // can roll again
+    gameState = game.useDice(4, 0);
+    // the player doesn't change, they need to roll again
+    REQUIRE(gameState.currentPlayer == PksColor::Yellow);
 }
 
 TEST_CASE("Can roll doubles many times") {
@@ -158,7 +164,8 @@ TEST_CASE("Can roll doubles many times") {
         .piecesByPlayer = TestBoards::allPiecesAtStart(),
         .currentPlayer = PksColor::Yellow,
     };
-    REQUIRE(game.start(initialBoard) == PksColor::Yellow);
+    auto gameState = game.start(initialBoard);
+    REQUIRE(gameState.currentPlayer == PksColor::Yellow);
 
     // Roll a "random" dice
     mockDiceRoller.setNextRandomValues(1, 1);
@@ -167,9 +174,10 @@ TEST_CASE("Can roll doubles many times") {
     REQUIRE(diceRoll.getDice() == std::pair{1, 1});
 
     // Use them both
-    REQUIRE(game.useDice(1, 0) == PksColor::Yellow);
-    REQUIRE(game.useDice(1, 0) == PksColor::Yellow);
-    REQUIRE(game.getCurrentBoardState().currentPlayer == PksColor::Yellow); // can roll again
+    gameState = game.useDice(1, 0);
+    REQUIRE(gameState.currentPlayer == PksColor::Yellow); // still need to use the second dice
+    gameState = game.useDice(1, 0);
+    REQUIRE(gameState.currentPlayer == PksColor::Yellow); // can roll again
 
     // Roll more doubles and use them
     mockDiceRoller.setNextRandomValues(2, 2);
@@ -177,9 +185,10 @@ TEST_CASE("Can roll doubles many times") {
     REQUIRE(!diceRoll.allDiceUsed());
     REQUIRE(diceRoll.getDice() == std::pair{2, 2});
 
-    REQUIRE(game.useDice(2, 0) == PksColor::Yellow);
-    REQUIRE(game.useDice(2, 0) == PksColor::Yellow);
-    REQUIRE(game.getCurrentBoardState().currentPlayer == PksColor::Yellow); // can roll again
+    gameState = game.useDice(2, 0);
+    REQUIRE(gameState.currentPlayer == PksColor::Yellow);
+    gameState = game.useDice(2, 0);
+    REQUIRE(gameState.currentPlayer == PksColor::Yellow); // can roll again
 
     // Roll doubles one last time, the player loses their turn after this
     mockDiceRoller.setNextRandomValues(3, 3);
@@ -188,7 +197,8 @@ TEST_CASE("Can roll doubles many times") {
     REQUIRE(diceRoll.getDice() == std::pair{3, 3});
     REQUIRE(game.getCurrentBoardState().currentPlayer == PksColor::Yellow); // still the player's turn
 
-    REQUIRE(game.useDice(3, 0) == PksColor::Yellow);
-    REQUIRE(game.useDice(3, 0) == PksColor::Red); // not the original player anymore
-    REQUIRE(game.getCurrentBoardState().currentPlayer == PksColor::Red); // it's another player's turn
+    gameState = game.useDice(3, 0);
+    REQUIRE(gameState.currentPlayer == PksColor::Yellow);
+    gameState = game.useDice(3, 0);
+    REQUIRE(gameState.currentPlayer == PksColor::Red); // it's another player's turn
 }

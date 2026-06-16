@@ -22,7 +22,7 @@ PksGame::PksGame(PksDiceRoller &diceRoller)
       lastRollDiceResult{nullptr} {
 }
 
-PksColor PksGame::start() {
+PksBoardState PksGame::start() {
     if (gameState == PksGameState::GameInCourse) {
         throw PksException{"PksGame::start(): can't start a game that has already started."};
     }
@@ -33,11 +33,11 @@ PksColor PksGame::start() {
     }
 
     gameState = PksGameState::GameInCourse;
-    return currentPlayer = PksColor::Yellow;
+    return getCurrentBoardState();
 }
 
 // Useful for tests
-PksColor PksGame::start(const PksBoardState &boardState) {
+PksBoardState PksGame::start(const PksBoardState &boardState) {
     if (gameState == PksGameState::GameInCourse) {
         throw PksException{"PksGame::start(): can't start a game that has already started."};
     }
@@ -48,7 +48,8 @@ PksColor PksGame::start(const PksBoardState &boardState) {
     }
 
     gameState = PksGameState::GameInCourse;
-    return currentPlayer = boardState.currentPlayer;
+    currentPlayer = boardState.currentPlayer;
+    return getCurrentBoardState();
 }
 
 void PksGame::stop() {
@@ -108,7 +109,7 @@ void PksGame::nextPlayer() {
     numConsecutiveDiceRolls = 0;
 }
 
-PksColor PksGame::useDice(const int diceValue, const int numPiece) {
+PksBoardState PksGame::useDice(const int diceValue, const int numPiece) {
     validateGameInCourse("PksGame::useDice()");
 
     if (numPiece < 0 || numPiece >= NUM_PIECES) {
@@ -125,7 +126,7 @@ PksColor PksGame::useDice(const int diceValue, const int numPiece) {
         nextPlayer();
     }
 
-    return currentPlayer;
+    return getCurrentBoardState();
 }
 
 PksBoardState PksGame::getCurrentBoardState() const {
@@ -144,7 +145,7 @@ void PksGame::moveCurrentPlayerPiece(int piece, int numSpots) {
     // New position in player local numbering
     const int newPos = players.at(currentPlayer).movePiece(piece, numSpots);
 
-    const auto spotType = getSpotType(newPos);
+    const auto spotType = PksUtils::getSpotType(newPos);
     if (spotType == PksSpotType::Goal && players.at(currentPlayer).allPiecesAtTarget()) {
         gameState = PksGameState::GameOver;
         return;
@@ -169,29 +170,6 @@ void PksGame::moveHomeAllPiecesAtSpot(const int spot) {
     }
 }
 
-PksSpotType PksGame::getSpotType(const int spot) {
-    // Initial spot, treated as both Home and Jail
-    if (spot == HOME_SPOT) { return PksSpotType::Home; }
-
-    // Private stair, when the player gets here its pieces can't be eaten
-    if (spot >= 63 && spot <= 70) {
-        return PksSpotType::SafePrivate;
-    }
-
-    // Final spot, a piece can't move anymore after it has reached the target
-    if (spot == FINAL_TARGET_SPOT) {
-        return PksSpotType::Goal;
-    }
-
-    // Shared spots
-    // Every 18 spots the types repeat, so simplify the spot number taking advantage of it being 0-indexed
-    const int simplifiedSpot = spot % 17;
-    if (simplifiedSpot == 0 || simplifiedSpot == 7 || simplifiedSpot == 12) {
-        return PksSpotType::SafeShared;
-    }
-
-    return PksSpotType::UnsafeShared;
-}
 
 void PksGame::validateGameInCourse(const std::string &methodName) const {
     if (gameState == PksGameState::GameInCourse) {
