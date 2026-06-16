@@ -1,7 +1,7 @@
 #include "TestBoards.h"
 
-TestBoard TestBoards::allPiecesAtHome() {
-    return TestBoard{
+PksPiecesByPlayer TestBoards::allPiecesAtHome() {
+    return {
         {PksColor::Yellow, {-1, -1, -1, -1}},
         {PksColor::Red, {-1, -1, -1, -1}},
         {PksColor::Green, {-1, -1, -1, -1}},
@@ -9,8 +9,8 @@ TestBoard TestBoards::allPiecesAtHome() {
     };
 }
 
-TestBoard TestBoards::allPiecesAtStart() {
-    return TestBoard{
+PksPiecesByPlayer TestBoards::allPiecesAtStart() {
+    return {
         {PksColor::Yellow, {0, 0, 0, 0}},
         {PksColor::Red, {0, 0, 0, 0}},
         {PksColor::Green, {0, 0, 0, 0}},

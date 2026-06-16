@@ -1,17 +1,12 @@
 #ifndef LIBPKS_TESTBOARDS_H
 #define LIBPKS_TESTBOARDS_H
 
-#include <map>
-#include <vector>
-
-#include "PksColor.h"
-
-typedef std::map<PksColor, std::vector<int> > TestBoard;
+#include "PksGameSnapshot.h"
 
 namespace TestBoards {
-    TestBoard allPiecesAtHome();
+    PksPiecesByPlayer allPiecesAtHome();
 
-    TestBoard allPiecesAtStart();
+    PksPiecesByPlayer allPiecesAtStart();
 };
 
 #endif //LIBPKS_TESTBOARDS_H

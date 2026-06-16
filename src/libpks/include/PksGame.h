@@ -6,8 +6,8 @@
 #include "PksDiceRoller.h"
 #include "PksPlayer.h"
 #include "PksDiceResult.h"
-#include "PksBoardState.h"
-#include "PksGameState.h"
+#include "PksGameSnapshot.h"
+#include "PksGameSnapshot.h"
 #include "PksSpotType.h"
 
 /**
@@ -30,10 +30,14 @@
 class PksGame {
     std::map<PksColor, PksPlayer> players;
     PksDiceRoller &diceRoller;
-    PksGameState gameState;
-    PksColor currentPlayer;
-    int numConsecutiveDiceRolls;
-    std::unique_ptr<PksDiceResult> lastRollDiceResult;
+    PksGameState gameState = PksGameState::GameNotStarted;
+    int numConsecutiveDiceRolls = 0;
+
+    // Naked pointer as it won't be our responsibility to free it up
+    const PksColor* currentPlayer = nullptr;
+
+    // Keeps track of the last dice values and whether they have already been used
+    std::unique_ptr<PksDiceResult> lastRollDiceResult = nullptr;
 
     void validateGameInCourse(const std::string &methodName) const;
 
@@ -49,18 +53,18 @@ public:
     // Used for testing. Allows mocking the Dice Roller to give the dice values the tests expect.
     explicit PksGame(PksDiceRoller &diceRoller);
 
-    PksBoardState start();
+    PksGameSnapshot start();
 
     // Useful for tests
-    PksBoardState start(const PksBoardState &boardState);
+    PksGameSnapshot start(const PksGameSnapshot& gameSnapshot);
 
     void stop();
 
     PksDiceResult rollDice();
 
-    PksBoardState useDice(int diceValue, int numPiece);
+    PksGameSnapshot useDice(int diceValue, int numPiece);
 
-    [[nodiscard]] PksBoardState getCurrentBoardState() const;
+    [[nodiscard]] PksGameSnapshot getGameSnapshot() const;
 };
 
 #endif // PKSLIB_LIBRARY_H

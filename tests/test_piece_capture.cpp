@@ -10,7 +10,7 @@ TEST_CASE("A piece captures another one") {
     MockDiceRoller mockDiceRoller;
     PksGame game{mockDiceRoller};
 
-    PksBoardState initialBoard = {
+    PksGameSnapshot initialBoard = {
         .piecesByPlayer = {
             {PksColor::Yellow, {17, 18, 19, 20}},
             {PksColor::Red, {0, 0, 0, 0}},
@@ -19,42 +19,42 @@ TEST_CASE("A piece captures another one") {
         },
         .currentPlayer = PksColor::Red,
     };
-    auto gameState = game.start(initialBoard);
-    REQUIRE(gameState.currentPlayer == PksColor::Red);
+    auto gameSnapshot = game.start(initialBoard);
+    REQUIRE(gameSnapshot.currentPlayer == PksColor::Red);
 
     // Roll a dice and capture a piece
     mockDiceRoller.setNextRandomValues(1, 2);
     game.rollDice();
-    gameState = game.useDice(1, 0);
+    gameSnapshot = game.useDice(1, 0);
 
-    REQUIRE(gameState.piecesByPlayer[PksColor::Red] == std::vector{1, 0, 0, 0});
+    REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Red] == std::vector{1, 0, 0, 0});
 
     // And the other player should have a piece at home now
-    REQUIRE(gameState.piecesByPlayer[PksColor::Yellow] == std::vector{17, -1, 19, 20});
-    REQUIRE(gameState.piecesByPlayer[PksColor::Green] == std::vector{0, 0, 0, 0});
-    REQUIRE(gameState.piecesByPlayer[PksColor::Blue] == std::vector{0, 0, 0, 0});
+    REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Yellow] == std::vector{17, -1, 19, 20});
+    REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Green] == std::vector{0, 0, 0, 0});
+    REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Blue] == std::vector{0, 0, 0, 0});
 
     // Still the same player's turn
-    REQUIRE(gameState.currentPlayer == PksColor::Red);
+    REQUIRE(gameSnapshot.currentPlayer == PksColor::Red);
 
     // Use the other dice and capture yet more pieces
-    gameState = game.useDice(2, 0);
+    gameSnapshot = game.useDice(2, 0);
 
-    REQUIRE(gameState.piecesByPlayer[PksColor::Red] == std::vector{3, 0, 0, 0});
+    REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Red] == std::vector{3, 0, 0, 0});
 
-    REQUIRE(gameState.piecesByPlayer[PksColor::Yellow] == std::vector{17, -1, 19, -1});
-    REQUIRE(gameState.piecesByPlayer[PksColor::Green] == std::vector{0, 0, 0, 0});
-    REQUIRE(gameState.piecesByPlayer[PksColor::Blue] == std::vector{0, 0, 0, 0});
+    REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Yellow] == std::vector{17, -1, 19, -1});
+    REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Green] == std::vector{0, 0, 0, 0});
+    REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Blue] == std::vector{0, 0, 0, 0});
 
     // Next player's turn
-    REQUIRE(gameState.currentPlayer == PksColor::Green);
+    REQUIRE(gameSnapshot.currentPlayer == PksColor::Green);
 }
 
 TEST_CASE("A piece captures multiple pieces of the same color") {
     MockDiceRoller mockDiceRoller;
     PksGame game{mockDiceRoller};
 
-    PksBoardState initialBoard = {
+    PksGameSnapshot initialBoard = {
         .piecesByPlayer = {
             {PksColor::Yellow, {0, 0, 0, 0}},
             {PksColor::Red, {0, 0, 0, 0}},
@@ -63,27 +63,27 @@ TEST_CASE("A piece captures multiple pieces of the same color") {
         },
         .currentPlayer = PksColor::Red,
     };
-    auto gameState = game.start(initialBoard);
-    REQUIRE(gameState.currentPlayer == PksColor::Red);
+    auto gameSnapshot = game.start(initialBoard);
+    REQUIRE(gameSnapshot.currentPlayer == PksColor::Red);
 
     // Roll a dice and capture a piece
     mockDiceRoller.setNextRandomValues(1, 2);
     game.rollDice();
-    gameState = game.useDice(1, 0);
+    gameSnapshot = game.useDice(1, 0);
 
-    REQUIRE(gameState.piecesByPlayer[PksColor::Red] == std::vector{1, 0, 0, 0});
+    REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Red] == std::vector{1, 0, 0, 0});
 
     // And the other player should have 2 pieces at home now
-    REQUIRE(gameState.piecesByPlayer[PksColor::Yellow] == std::vector{0, 0, 0, 0});
-    REQUIRE(gameState.piecesByPlayer[PksColor::Green] == std::vector{0, -1, -1, 0});
-    REQUIRE(gameState.piecesByPlayer[PksColor::Blue] == std::vector{0, 0, 0, 0});
+    REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Yellow] == std::vector{0, 0, 0, 0});
+    REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Green] == std::vector{0, -1, -1, 0});
+    REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Blue] == std::vector{0, 0, 0, 0});
 }
 
 TEST_CASE("A piece captures multiple pieces of different colors") {
     MockDiceRoller mockDiceRoller;
     PksGame game{mockDiceRoller};
 
-    PksBoardState initialBoard = {
+    PksGameSnapshot initialBoard = {
         .piecesByPlayer = {
             {PksColor::Yellow, {17, 18, 19, 0}},
             {PksColor::Red, {0, 0, 0, 0}},
@@ -92,27 +92,27 @@ TEST_CASE("A piece captures multiple pieces of different colors") {
         },
         .currentPlayer = PksColor::Red,
     };
-    auto gameState = game.start(initialBoard);
-    REQUIRE(gameState.currentPlayer == PksColor::Red);
+    auto gameSnapshot = game.start(initialBoard);
+    REQUIRE(gameSnapshot.currentPlayer == PksColor::Red);
 
     // Roll a dice and capture a piece
     mockDiceRoller.setNextRandomValues(1, 2);
     game.rollDice();
-    gameState = game.useDice(1, 0);
+    gameSnapshot = game.useDice(1, 0);
 
-    REQUIRE(gameState.piecesByPlayer[PksColor::Red] == std::vector{1, 0, 0, 0});
+    REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Red] == std::vector{1, 0, 0, 0});
 
     // And the other players should have some pieces at home now
-    REQUIRE(gameState.piecesByPlayer[PksColor::Yellow] == std::vector{17, -1, 19, 0});
-    REQUIRE(gameState.piecesByPlayer[PksColor::Green] == std::vector{51, -1, 53, 0});
-    REQUIRE(gameState.piecesByPlayer[PksColor::Blue] == std::vector{34, -1, 36, 0});
+    REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Yellow] == std::vector{17, -1, 19, 0});
+    REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Green] == std::vector{51, -1, 53, 0});
+    REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Blue] == std::vector{34, -1, 36, 0});
 }
 
 TEST_CASE("Cannot capture pieces in safe spots") {
     MockDiceRoller mockDiceRoller;
     PksGame game{mockDiceRoller};
 
-    PksBoardState initialBoard = {
+    PksGameSnapshot initialBoard = {
         .piecesByPlayer = {
             {PksColor::Yellow, {23, 0, 0, 0}},
             {PksColor::Red, {7, 0, 0, 0}},
@@ -121,20 +121,20 @@ TEST_CASE("Cannot capture pieces in safe spots") {
         },
         .currentPlayer = PksColor::Yellow,
     };
-    auto gameState = game.start(initialBoard);
-    REQUIRE(gameState.currentPlayer == PksColor::Yellow);
+    auto gameSnapshot = game.start(initialBoard);
+    REQUIRE(gameSnapshot.currentPlayer == PksColor::Yellow);
 
     // Roll a dice and reach the same spot where another player has a piece
     mockDiceRoller.setNextRandomValues(1, 2);
     game.rollDice();
-    gameState = game.useDice(1, 0);
+    gameSnapshot = game.useDice(1, 0);
 
-    REQUIRE(gameState.piecesByPlayer[PksColor::Yellow] == std::vector{24, 0, 0, 0}); // the piece moved normally
-    REQUIRE(gameState.piecesByPlayer[PksColor::Red] == std::vector{7, 0, 0, 0}); // the other piece was not affected
+    REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Yellow] == std::vector{24, 0, 0, 0}); // the piece moved normally
+    REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Red] == std::vector{7, 0, 0, 0}); // the other piece was not affected
 
     // Ensure the Yellow piece is at the same spot where the Red piece is
-    const int yellowSpot = gameState.piecesByPlayer[PksColor::Yellow][0];
-    const int redSpot = gameState.piecesByPlayer[PksColor::Red][0];
+    const int yellowSpot = gameSnapshot.piecesByPlayer[PksColor::Yellow][0];
+    const int redSpot = gameSnapshot.piecesByPlayer[PksColor::Red][0];
     REQUIRE(PksUtils::convertSpotNumber(PksColor::Yellow, PksColor::Red, yellowSpot) == redSpot);
 }
 
@@ -142,7 +142,7 @@ TEST_CASE("When going out of Home, capture foreign pieces currently at our Home"
     MockDiceRoller mockDiceRoller;
     PksGame game{mockDiceRoller};
 
-    PksBoardState initialBoard = {
+    PksGameSnapshot initialBoard = {
         .piecesByPlayer = {
                 {PksColor::Yellow, {0, 0, 0, HOME_SPOT}},
                 {PksColor::Red, {51, 0, 0, 0}},
@@ -151,15 +151,15 @@ TEST_CASE("When going out of Home, capture foreign pieces currently at our Home"
             },
             .currentPlayer = PksColor::Yellow,
     };
-    auto gameState = game.start(initialBoard);
-    REQUIRE(gameState.currentPlayer == PksColor::Yellow);
+    auto gameSnapshot = game.start(initialBoard);
+    REQUIRE(gameSnapshot.currentPlayer == PksColor::Yellow);
 
     // Roll doubles to get out of home
     mockDiceRoller.setNextRandomValues(2, 2);
     game.rollDice();
 
     // All pieces at our home should have been captured
-    gameState = game.getCurrentBoardState();
-    REQUIRE(gameState.piecesByPlayer[PksColor::Yellow] == std::vector{0, 0, 0, 0}); // piece got out of home
-    REQUIRE(gameState.piecesByPlayer[PksColor::Red] == std::vector{HOME_SPOT, 0, 0, 0}); // foreign piece sent home
+    gameSnapshot = game.getGameSnapshot();
+    REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Yellow] == std::vector{0, 0, 0, 0}); // piece got out of home
+    REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Red] == std::vector{HOME_SPOT, 0, 0, 0}); // foreign piece sent home
 }

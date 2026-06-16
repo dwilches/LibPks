@@ -1,5 +1,5 @@
-#ifndef LIBPKS_PKSROLLDICERESULT_H
-#define LIBPKS_PKSROLLDICERESULT_H
+#ifndef LIBPKS_PKSDICERESULT_H
+#define LIBPKS_PKSDICERESULT_H
 
 #include "PksException.h"
 
@@ -21,4 +21,4 @@ public:
     void markDiceAsUsed(int diceValue);
 };
 
-#endif //LIBPKS_PKSROLLDICERESULT_H
+#endif //LIBPKS_PKSDICERESULT_H

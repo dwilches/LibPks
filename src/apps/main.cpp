@@ -14,7 +14,7 @@ int main() {
 
     PksDiceRoller roller;
     PksGame game{roller};
-    const PksBoardState gameState = game.start();
+    const PksGameSnapshot gameState = game.start();
     std::cout << "CurrentPlayer is " << gameState.currentPlayer << std::endl;
 
     std::cout << "This player's pieces are all at home (-1 is Home): " << std::endl;
