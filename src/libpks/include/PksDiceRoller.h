@@ -4,8 +4,8 @@
 #include <random>
 
 /**
- * Small implementantion of a random dice.
- * This class allows mocking out the random numebrs source, making testing simple.
+ * Small implementation of a random dice.
+ * This class allows mocking out the random numbers source, making testing simple.
  */
 class PksDiceRoller {
     std::default_random_engine generator;

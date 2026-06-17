@@ -46,24 +46,30 @@ class PksGame {
     // Moves all pieces at this spot home, except the pieces of the current player
     void moveHomeAllPiecesAtSpot(int spot);
 
-
+    // Ends a player's turn and starts the next one
     void nextPlayer();
 
 public:
     // Used for testing. Allows mocking the Dice Roller to give the dice values the tests expect.
     explicit PksGame(PksDiceRoller &diceRoller);
 
+    // Invoked to make an instance of PksGame ready for playing
     PksGameSnapshot start();
 
     // Useful for tests
     PksGameSnapshot start(const PksGameSnapshot& gameSnapshot);
 
+    // Ends an ongoing game, so the same PksGame instance can be used to start a new game later
     void stop();
 
+    // Invoked to roll 2 random dice
     PksDiceResult rollDice();
 
+    // Moves a piece of the current player a certain number of spots
     PksGameSnapshot useDice(int diceValue, int numPiece);
 
+    // Returns the current location of every piece of the game, as well as whether the game has finished and who the
+    // current player is.
     [[nodiscard]] PksGameSnapshot getGameSnapshot() const;
 };
 
