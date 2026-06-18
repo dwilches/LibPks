@@ -83,10 +83,10 @@ PksDiceResult PksGame::rollDice() {
         // Can only use a non-doubles roll if there is at least 1 piece in play
         if (players.at(*currentPlayer).allPlayingPiecesAtHome()) {
             lastRollDiceResult->setDiceCannotBeUsed();
-        }
 
-        if (numConsecutiveDiceRolls == MAX_DICE_ROLLS) {
-            nextPlayer();
+            if (numConsecutiveDiceRolls == MAX_DICE_ROLLS) {
+                nextPlayer();
+            }
         }
     }
 

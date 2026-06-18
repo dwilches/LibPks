@@ -156,7 +156,53 @@ TEST_CASE("Can roll doubles (when not at home)") {
     REQUIRE(gameSnapshot.currentPlayer == PksColor::Yellow);
 }
 
-TEST_CASE("Can roll doubles many times") {
+TEST_CASE("Can roll doubles twice in a row") {
+    MockDiceRoller mockDiceRoller;
+    PksGame game{mockDiceRoller};
+
+    PksGameSnapshot initialBoard = {
+        .piecesByPlayer = TestBoards::allPiecesAtStart(),
+        .currentPlayer = PksColor::Yellow,
+    };
+    auto gameSnapshot = game.start(initialBoard);
+    REQUIRE(gameSnapshot.currentPlayer == PksColor::Yellow);
+
+    // Roll a "random" dice
+    mockDiceRoller.setNextRandomValues(1, 1);
+    auto diceRoll = game.rollDice();
+    REQUIRE(!diceRoll.allDiceUsed());
+    REQUIRE(diceRoll.getDice() == std::pair{1, 1});
+
+    // Use them both
+    gameSnapshot = game.useDice(1, 0);
+    REQUIRE(gameSnapshot.currentPlayer == PksColor::Yellow); // still need to use the second dice
+    gameSnapshot = game.useDice(1, 0);
+    REQUIRE(gameSnapshot.currentPlayer == PksColor::Yellow); // can roll again
+
+    // Roll more doubles and use them
+    mockDiceRoller.setNextRandomValues(2, 2);
+    diceRoll = game.rollDice();
+    REQUIRE(!diceRoll.allDiceUsed());
+    REQUIRE(diceRoll.getDice() == std::pair{2, 2});
+
+    gameSnapshot = game.useDice(2, 0);
+    REQUIRE(gameSnapshot.currentPlayer == PksColor::Yellow);
+    gameSnapshot = game.useDice(2, 0);
+    REQUIRE(gameSnapshot.currentPlayer == PksColor::Yellow); // can roll again
+
+    // Roll doubles one last time, the player loses their turn after this
+    mockDiceRoller.setNextRandomValues(3, 1);
+    diceRoll = game.rollDice();
+    REQUIRE(!diceRoll.allDiceUsed());
+    REQUIRE(diceRoll.getDice() == std::pair{3, 1});
+
+    gameSnapshot = game.useDice(3, 0);
+    REQUIRE(gameSnapshot.currentPlayer == PksColor::Yellow);
+    gameSnapshot = game.useDice(1, 0);
+    REQUIRE(gameSnapshot.currentPlayer == PksColor::Red); // it's another player's turn
+}
+
+TEST_CASE("Can roll doubles 3 times in a row") {
     MockDiceRoller mockDiceRoller;
     PksGame game{mockDiceRoller};
 
@@ -195,7 +241,6 @@ TEST_CASE("Can roll doubles many times") {
     diceRoll = game.rollDice();
     REQUIRE(!diceRoll.allDiceUsed());
     REQUIRE(diceRoll.getDice() == std::pair{3, 3});
-    REQUIRE(game.getGameSnapshot().currentPlayer == PksColor::Yellow); // still the player's turn
 
     gameSnapshot = game.useDice(3, 0);
     REQUIRE(gameSnapshot.currentPlayer == PksColor::Yellow);
