@@ -14,6 +14,8 @@ namespace PksUtils {
     // Gets the type of spot to determine if it's a safe/unsafe/shared spot.
     // Spots have numbers only from the perspective of players, there is no global numbering.
     PksSpotType getSpotType(int spot);
+
+    bool isValidAndUnsafeShared(int possibleSpot);
 };
 
 #endif //LIBPKS_PKSUTILS_H

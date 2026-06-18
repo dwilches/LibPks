@@ -2,13 +2,12 @@
 #define PKSLIB_LIBRARY_H
 
 #include <memory>
+#include <set>
 
 #include "PksDiceRoller.h"
 #include "PksPlayer.h"
 #include "PksDiceResult.h"
 #include "PksGameSnapshot.h"
-#include "PksGameSnapshot.h"
-#include "PksSpotType.h"
 
 /**
  * Every Parqués piece can be in one of 73 different spots. To simplify the implementation, I chose these numbers for
@@ -36,15 +35,20 @@ class PksGame {
     // Naked pointer as it won't be our responsibility to free it up
     const PksColor* currentPlayer = nullptr;
 
+    // When a player loses the opportunity to capture a piece, another player can snitch on them.
+    int snitchablePiece = -1;
+
     // Keeps track of the last dice values and whether they have already been used
     std::unique_ptr<PksDiceResult> lastRollDiceResult = nullptr;
 
     void validateGameInCourse(const std::string &methodName) const;
 
-    void moveCurrentPlayerPiece(int piece, int numSpots);
+    // Returns true if any piece was captured.
+    bool moveCurrentPlayerPiece(int piece, int numSpots);
 
-    // Moves all pieces at this spot home, except the pieces of the current player
-    void moveHomeAllPiecesAtSpot(int spot);
+    // Moves all pieces at this spot home, except the pieces of the current player.
+    // Returns true if any piece was captured.
+    bool moveHomeAllPiecesAtSpot(int spot);
 
     // Ends a player's turn and starts the next one
     void nextPlayer();
@@ -68,9 +72,23 @@ public:
     // Moves a piece of the current player a certain number of spots
     PksGameSnapshot useDice(int diceValue, int numPiece);
 
+    // Capturing a piece is mandatory: when a player misses the opportunity to capture a piece, then their own piece
+    // is punished by sending it home (but only if another player catches the mistake).
+    // Returns `true` if the snitch was valid.
+    bool snitchOnPlayer(const PksColor& snitched, int numPiece);
+
     // Returns the current location of every piece of the game, as well as whether the game has finished and who the
     // current player is.
     [[nodiscard]] PksGameSnapshot getGameSnapshot() const;
+
+    // Visible for tests.
+    std::map<int, std::set<int> > getAttackableSpots() const;
+
+    // Checks if there is any piece that can be captured with the current dice roll. If there is, return the piece that
+    // could perform the capture. If the player doesn't end up capturing any piece in this turn, their piece can be
+    // snitched.
+    // Visible for tests.
+    int searchForSnitchablePieces() const;
 };
 
 #endif // PKSLIB_LIBRARY_H

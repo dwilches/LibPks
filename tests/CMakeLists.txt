@@ -8,6 +8,7 @@ add_executable(libpks_tests
         test_piece_capture.cpp
         test_convert_spot_numbers.cpp
         test_game_over.cpp
+        test_snitch.cpp
 )
 
 target_link_libraries(libpks_tests PRIVATE libpks)

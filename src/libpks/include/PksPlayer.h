@@ -31,13 +31,19 @@ public:
     int movePiece(int piece, int numSpots);
 
     // Invoked when another player falls in this spot, so all the pieces of this player at that spot need to go home.
-    void movePiecesHomeIfAtSpot(int numSpot);
+    // Returns true if any piece was captured.
+    bool movePiecesHomeIfAtSpot(int numSpot);
 
     // Invoked when the player rolls doubles and there was at least 1 piece home
     void moveAllPiecesOutOfHome();
 
     // Invoked when the player rolls doubles 3 times in a row
     void moveAllPlayingPiecesHome();
+
+    // Useful for when a specific piece is captured. For example, when a snitch succeeds.
+    void movePieceHome(int numPiece);
+
+    bool anyPiecesAtSpot(int numSpot) const;
 };
 
 #endif //LIBPKS_PKSPLAYER_H

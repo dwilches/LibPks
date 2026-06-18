@@ -35,7 +35,7 @@ PksSpotType PksUtils::getSpotType(const int spot) {
     if (spot == HOME_SPOT) { return PksSpotType::Home; }
 
     // Private stair, when the player gets here its pieces can't be eaten
-    if (spot >= 63 && spot <= 70) {
+    if (spot >= LAST_SHARED_SPOT && spot < FINAL_TARGET_SPOT) {
         return PksSpotType::SafePrivate;
     }
 
@@ -52,4 +52,10 @@ PksSpotType PksUtils::getSpotType(const int spot) {
     }
 
     return PksSpotType::UnsafeShared;
+}
+
+bool PksUtils::isValidAndUnsafeShared(const int possibleSpot) {
+    return possibleSpot >= START_SPOT &&
+           possibleSpot <= LAST_SHARED_SPOT &&
+           getSpotType(possibleSpot) == PksSpotType::UnsafeShared;
 }

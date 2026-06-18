@@ -38,12 +38,15 @@ int PksPlayer::movePiece(const int piece, const int numSpots) {
     return newPos;
 }
 
-void PksPlayer::movePiecesHomeIfAtSpot(const int numSpot) {
+bool PksPlayer::movePiecesHomeIfAtSpot(const int numSpot) {
+    bool anyPieceCaptured = false;
     for (auto &piece: pieces) {
         if (piece == numSpot) {
             piece = HOME_SPOT;
+            anyPieceCaptured = true;
         }
     }
+    return anyPieceCaptured;
 }
 
 void PksPlayer::moveAllPiecesOutOfHome() {
@@ -62,3 +65,15 @@ void PksPlayer::moveAllPlayingPiecesHome() {
     }
 }
 
+void PksPlayer::movePieceHome(int numPiece) {
+    pieces[numPiece] = HOME_SPOT;
+}
+
+bool PksPlayer::anyPiecesAtSpot(const int numSpot) const {
+    for (auto &piece: pieces) {
+        if (piece == numSpot) {
+            return true;
+        }
+    }
+    return false;
+}
