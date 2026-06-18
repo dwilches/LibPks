@@ -27,7 +27,7 @@ bool PksPlayer::allPiecesAtTarget() const {
 }
 
 int PksPlayer::movePiece(const int piece, const int numSpots) {
-    if (pieces[piece] == FINAL_TARGET_SPOT) {
+    if (pieces[piece] == FINAL_TARGET_SPOT || pieces[piece] == HOME_SPOT) {
         throw PksException{
             "PksPlayer::movePiece(): Attempted to move a piece that is out of play: " + std::to_string(piece)
         };

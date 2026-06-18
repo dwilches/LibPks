@@ -240,7 +240,37 @@ TEST_CASE("Three consecutive doubles send all playing pieces homes") {
 
     // Only the pieces that were in play are sent home
     gameSnapshot = game.getGameSnapshot();
+    // The piece that was out of play  is untouched
     REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Yellow] ==
-        std::vector{HOME_SPOT, HOME_SPOT, FINAL_TARGET_SPOT, HOME_SPOT}); // The piece that was out of play  is untouched
+            std::vector{HOME_SPOT, HOME_SPOT, FINAL_TARGET_SPOT, HOME_SPOT});
     REQUIRE(gameSnapshot.currentPlayer == PksColor::Red); // it's another player's turn
+}
+
+TEST_CASE("Can't use a valid dice on a piece that is not in play") {
+    MockDiceRoller mockDiceRoller;
+    PksGame game{mockDiceRoller};
+
+    // The current player is not at Home
+    PksGameSnapshot initialBoard = {
+        .piecesByPlayer = {
+            {PksColor::Yellow, {0, HOME_SPOT, 0, FINAL_TARGET_SPOT}},
+            {PksColor::Red, {-1, -1, -1, -1}},
+            {PksColor::Green, {-1, -1, -1, -1}},
+            {PksColor::Blue, {-1, -1, -1, -1}},
+        },
+        .currentPlayer = PksColor::Yellow,
+    };
+    auto gameSnapshot = game.start(initialBoard);
+    REQUIRE(gameSnapshot.currentPlayer == PksColor::Yellow);
+
+    // Roll a "random" dice
+    mockDiceRoller.setNextRandomValues(2, 3);
+    game.rollDice();
+    REQUIRE_THROWS(game.useDice(2, 1)); // Piece at home
+    REQUIRE_THROWS(game.useDice(2, 3)); // Piece already out of play
+
+    // Board should be identical
+    gameSnapshot = game.getGameSnapshot();
+    REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Yellow] == std::vector{0, HOME_SPOT, 0, FINAL_TARGET_SPOT});
+    REQUIRE(gameSnapshot.currentPlayer == PksColor::Yellow);
 }
