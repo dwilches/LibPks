@@ -33,8 +33,11 @@ public:
     // Invoked when another player falls in this spot, so all the pieces of this player at that spot need to go home.
     void movePiecesHomeIfAtSpot(int numSpot);
 
-    // Invoked when the player rolls doubles
+    // Invoked when the player rolls doubles and there was at least 1 piece home
     void moveAllPiecesOutOfHome();
+
+    // Invoked when the player rolls doubles 3 times in a row
+    void moveAllPlayingPiecesHome();
 };
 
 #endif //LIBPKS_PKSPLAYER_H

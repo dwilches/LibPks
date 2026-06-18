@@ -1,6 +1,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "MockDiceRoller.h"
+#include "PksConstants.h"
 #include "PksGame.h"
 #include "src/TestBoards.h"
 
@@ -190,7 +191,7 @@ TEST_CASE("Can roll doubles twice in a row") {
     gameSnapshot = game.useDice(2, 0);
     REQUIRE(gameSnapshot.currentPlayer == PksColor::Yellow); // can roll again
 
-    // Roll doubles one last time, the player loses their turn after this
+    // Roll dice one last time, it's not doubles this time
     mockDiceRoller.setNextRandomValues(3, 1);
     diceRoll = game.rollDice();
     REQUIRE(!diceRoll.allDiceUsed());
@@ -202,48 +203,44 @@ TEST_CASE("Can roll doubles twice in a row") {
     REQUIRE(gameSnapshot.currentPlayer == PksColor::Red); // it's another player's turn
 }
 
-TEST_CASE("Can roll doubles 3 times in a row") {
+TEST_CASE("Three consecutive doubles send all playing pieces homes") {
     MockDiceRoller mockDiceRoller;
     PksGame game{mockDiceRoller};
 
     PksGameSnapshot initialBoard = {
-        .piecesByPlayer = TestBoards::allPiecesAtStart(),
+        .piecesByPlayer = {
+            {PksColor::Yellow, {0, START_SPOT, FINAL_TARGET_SPOT, 10}},
+            {PksColor::Red, {0, 0, 0, 0}},
+            {PksColor::Green, {0, 0, 0, 0}},
+            {PksColor::Blue, {0, 0, 0, 0}},
+        },
         .currentPlayer = PksColor::Yellow,
     };
     auto gameSnapshot = game.start(initialBoard);
     REQUIRE(gameSnapshot.currentPlayer == PksColor::Yellow);
 
-    // Roll a "random" dice
+    // Roll doubles and use them
     mockDiceRoller.setNextRandomValues(1, 1);
-    auto diceRoll = game.rollDice();
-    REQUIRE(!diceRoll.allDiceUsed());
-    REQUIRE(diceRoll.getDice() == std::pair{1, 1});
+    game.rollDice();
 
-    // Use them both
-    gameSnapshot = game.useDice(1, 0);
-    REQUIRE(gameSnapshot.currentPlayer == PksColor::Yellow); // still need to use the second dice
-    gameSnapshot = game.useDice(1, 0);
-    REQUIRE(gameSnapshot.currentPlayer == PksColor::Yellow); // can roll again
+    game.useDice(1, 0);
+    game.useDice(1, 0);
 
-    // Roll more doubles and use them
+    // Roll more doubles and use them again
     mockDiceRoller.setNextRandomValues(2, 2);
-    diceRoll = game.rollDice();
-    REQUIRE(!diceRoll.allDiceUsed());
-    REQUIRE(diceRoll.getDice() == std::pair{2, 2});
+    game.rollDice();
+    game.useDice(2, 0);
+    game.useDice(2, 0);
 
-    gameSnapshot = game.useDice(2, 0);
-    REQUIRE(gameSnapshot.currentPlayer == PksColor::Yellow);
-    gameSnapshot = game.useDice(2, 0);
-    REQUIRE(gameSnapshot.currentPlayer == PksColor::Yellow); // can roll again
-
-    // Roll doubles one last time, the player loses their turn after this
+    // Roll doubles one last time, this causes all the player's pieces to be sent home, except those that are already
+    // out of play
     mockDiceRoller.setNextRandomValues(3, 3);
-    diceRoll = game.rollDice();
-    REQUIRE(!diceRoll.allDiceUsed());
-    REQUIRE(diceRoll.getDice() == std::pair{3, 3});
+    auto diceRoll = game.rollDice();
+    REQUIRE(diceRoll.allDiceUsed()); // can't use this dice roll
 
-    gameSnapshot = game.useDice(3, 0);
-    REQUIRE(gameSnapshot.currentPlayer == PksColor::Yellow);
-    gameSnapshot = game.useDice(3, 0);
+    // Only the pieces that were in play are sent home
+    gameSnapshot = game.getGameSnapshot();
+    REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Yellow] ==
+        std::vector{HOME_SPOT, HOME_SPOT, FINAL_TARGET_SPOT, HOME_SPOT}); // The piece that was out of play  is untouched
     REQUIRE(gameSnapshot.currentPlayer == PksColor::Red); // it's another player's turn
 }

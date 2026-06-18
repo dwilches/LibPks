@@ -53,3 +53,12 @@ void PksPlayer::moveAllPiecesOutOfHome() {
         }
     }
 }
+
+void PksPlayer::moveAllPlayingPiecesHome() {
+    for (auto &piece: pieces) {
+        if (piece != FINAL_TARGET_SPOT) {
+            piece = HOME_SPOT;
+        }
+    }
+}
+

@@ -138,11 +138,11 @@ TEST_CASE("Pieces move according to dice value (doubles test)") {
     REQUIRE(gameSnapshot.currentPlayer == PksColor::Yellow);
 
     // Roll another dice
-    mockDiceRoller.setNextRandomValues(2, 2);
+    mockDiceRoller.setNextRandomValues(2, 1);
     game.rollDice();
     game.useDice(2, 1);
-    gameSnapshot = game.useDice(2, 0);
-    REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Yellow] == std::vector{8, 23, 25, 30});
+    gameSnapshot = game.useDice(1, 0);
+    REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Yellow] == std::vector{7, 23, 25, 30});
 
     // Too many doubles, next player's turn
     REQUIRE(gameSnapshot.currentPlayer == PksColor::Red);

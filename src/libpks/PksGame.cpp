@@ -68,14 +68,23 @@ PksDiceResult PksGame::rollDice() {
 
     // If the player doesn't have any piece at play, they need doubles before being allowed to use the dice
     if (lastRollDiceResult->isDoubles()) {
+        // If there was at least one piece at home, the dice is implicitly used to take them out of there
         if (players.at(*currentPlayer).anyPieceAtHome()) {
-            // Implicitly use the dice roll to get our of Home
             players.at(*currentPlayer).moveAllPiecesOutOfHome();
             // The dice roll cannot be used for anything else
             lastRollDiceResult->setDiceCannotBeUsed();
 
             // Capture all pieces that were walking by our Home
             moveHomeAllPiecesAtSpot(START_SPOT);
+
+            nextPlayer();
+        }
+
+        // Doubles is good luck until it's 3 in a row, all pieces in play move back home
+        if (numConsecutiveDiceRolls == MAX_DICE_ROLLS) {
+            players.at(*currentPlayer).moveAllPlayingPiecesHome();
+            // The player loses the possibility of using this dice
+            lastRollDiceResult->setDiceCannotBeUsed();
 
             nextPlayer();
         }
