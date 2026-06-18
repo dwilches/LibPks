@@ -1,7 +1,10 @@
 #ifndef LIBPKS_PKSPLAYER_H
 #define LIBPKS_PKSPLAYER_H
 
+#include <set>
 #include <vector>
+
+#include "PksTypeDefs.h"
 
 /**
  * This class contains logic for moving a single player's pieces around the board.
@@ -23,6 +26,8 @@ public:
 
     [[nodiscard]] bool anyPieceAtHome() const;
 
+    [[nodiscard]] bool anyPiecesAtSpot(int numSpot) const;
+
     [[nodiscard]] bool allPlayingPiecesAtHome() const;
 
     [[nodiscard]] bool allPiecesAtTarget() const;
@@ -41,9 +46,7 @@ public:
     void moveAllPlayingPiecesHome();
 
     // Useful for when a specific piece is captured. For example, when a snitch succeeds.
-    void movePieceHome(int numPiece);
-
-    bool anyPiecesAtSpot(int numSpot) const;
+    void movePiecesHome(const std::set<PIECE_IDX> &);
 };
 
 #endif //LIBPKS_PKSPLAYER_H

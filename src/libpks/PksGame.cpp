@@ -63,9 +63,9 @@ PksDiceResult PksGame::rollDice() {
     // Execute through a pointer for the polymorphic behaviour required by mocks in tests
     const auto diceRoll = (&diceRoller)->rollNewPair();
 
-    lastRollDiceResult = std::make_unique<PksDiceResult>(PksDiceResult{diceRoll});
+    lastRollDiceResult = std::make_unique<PksDiceResult>(diceRoll);
     numConsecutiveDiceRolls++;
-    snitchablePiece = -1; // The ability to snitch on a player ends when the next player rolls
+    snitchablePieces = nullptr; // The ability to snitch on a player ends the next time dice are rolled
 
     if (lastRollDiceResult->isDoubles()) {
         // If the player doesn't have any piece at play, they need doubles before being allowed to use the dice.
@@ -103,7 +103,10 @@ PksDiceResult PksGame::rollDice() {
 
     // If the user has an option to use dice, then using them unwisely can get them snitched
     if (!lastRollDiceResult->allDiceUsed()) {
-        snitchablePiece = searchForSnitchablePieces();
+        const auto &gameSnapshot = getGameSnapshot();
+        snitchablePieces = std::make_unique<PksSnitchablePieces>(gameSnapshot.piecesByPlayer,
+                                                                 *currentPlayer,
+                                                                 diceRoll);
     }
 
     // Return a copy of the dice result (we don't want the user to tamper with our library's internals)
@@ -114,54 +117,6 @@ void PksGame::nextPlayer() {
     const int colorIndex = (static_cast<int>(*currentPlayer) + 1) % NUM_PLAYERS;
     currentPlayer = &playerColors[colorIndex];
     numConsecutiveDiceRolls = 0;
-}
-
-std::map<int, std::set<int> > PksGame::getAttackableSpots() const {
-    const auto currentDice = lastRollDiceResult->getDice();
-    const auto currentPlayerPieces = players.at(*currentPlayer).getPieces();
-
-    std::map<int, std::set<int> > attackableSpots;
-    for (size_t i = 0; i < currentPlayerPieces.size(); i++) {
-        const auto pieceSpot = currentPlayerPieces.at(i);
-
-        // Can't attack from home nor the private stair
-        if (pieceSpot == HOME_SPOT || pieceSpot > LAST_SHARED_SPOT) {
-            continue;
-        }
-
-        if (PksUtils::isValidAndUnsafeShared(pieceSpot + currentDice.first)) {
-            attackableSpots[i].insert(pieceSpot + currentDice.first);
-        }
-        if (PksUtils::isValidAndUnsafeShared(pieceSpot + currentDice.second)) {
-            attackableSpots[i].insert(pieceSpot + currentDice.second);
-        }
-        if (PksUtils::isValidAndUnsafeShared(pieceSpot + currentDice.first + currentDice.second)) {
-            attackableSpots[i].insert(pieceSpot + currentDice.first + currentDice.second);
-        }
-    }
-    return attackableSpots;
-}
-
-int PksGame::searchForSnitchablePieces() const {
-    // Check which spots can be attacked by the current player
-    const auto &allAttackSpots = getAttackableSpots();
-
-    for (const auto &otherColor: playerColors) {
-        // Ignore the current player, only interested in other players
-        if (otherColor == *currentPlayer) {
-            continue;
-        }
-
-        for (const auto &[playerPiece, attackableSpots]: allAttackSpots) {
-            for (const auto &attackSpot: attackableSpots) {
-                const int otherPlayerSpot = PksUtils::convertSpotNumber(*currentPlayer, otherColor, attackSpot);
-                if (players.at(otherColor).anyPiecesAtSpot(otherPlayerSpot)) {
-                    return playerPiece;
-                }
-            }
-        }
-    }
-    return -1;
 }
 
 PksGameSnapshot PksGame::useDice(const int diceValue, const int numPiece) {
@@ -185,22 +140,16 @@ PksGameSnapshot PksGame::useDice(const int diceValue, const int numPiece) {
 }
 
 // Returns true if the snitch was successful
-bool PksGame::snitchOnPlayer(const PksColor &snitched, const int numPiece) {
+bool PksGame::snitchOnPlayer(const PksColor &snitched, const std::set<PIECE_IDX> &pieces) {
     validateGameInCourse("PksGame::snitchOnPlayer()");
 
-    if (snitchablePiece != numPiece) {
-        return false;
-    }
-
-    const int prevIndex = (static_cast<int>(*currentPlayer) - 1) % NUM_PLAYERS;
-    const auto prevPlayer = &playerColors[prevIndex];
-    if (*prevPlayer != snitched) {
+    if (!snitchablePieces || !snitchablePieces->isSnitchValid(snitched, pieces)) {
         return false;
     }
 
     // Successful snitch
-    players.at(*prevPlayer).movePieceHome(numPiece);
-    snitchablePiece = -1;
+    const auto snitchedColor = snitchablePieces->getSnitchablePlayer();
+    players.at(snitchedColor).movePiecesHome(snitchablePieces->getSnitchablePieces());
     return true;
 }
 
@@ -212,7 +161,8 @@ PksGameSnapshot PksGame::getGameSnapshot() const {
     return {
         .piecesByPlayer = allPieces,
         .currentPlayer = *currentPlayer,
-        .gameState = gameState
+        .gameState = gameState,
+        .snitchablePieces = snitchablePieces ? snitchablePieces->getSnitchablePieces() : std::set<PIECE_IDX>{},
     };
 }
 

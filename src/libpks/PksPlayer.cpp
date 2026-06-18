@@ -19,7 +19,11 @@ bool PksPlayer::allPlayingPiecesAtHome() const {
 }
 
 bool PksPlayer::anyPieceAtHome() const {
-    return std::ranges::any_of(pieces, [](const int piece) { return piece == HOME_SPOT; });
+    return anyPiecesAtSpot(HOME_SPOT);
+}
+
+bool PksPlayer::anyPiecesAtSpot(const int numSpot) const {
+    return std::ranges::any_of(pieces, [numSpot](const int piece) { return piece == numSpot; });
 }
 
 bool PksPlayer::allPiecesAtTarget() const {
@@ -65,15 +69,8 @@ void PksPlayer::moveAllPlayingPiecesHome() {
     }
 }
 
-void PksPlayer::movePieceHome(int numPiece) {
-    pieces[numPiece] = HOME_SPOT;
-}
-
-bool PksPlayer::anyPiecesAtSpot(const int numSpot) const {
-    for (auto &piece: pieces) {
-        if (piece == numSpot) {
-            return true;
-        }
+void PksPlayer::movePiecesHome(const std::set<PIECE_IDX> &targetPieces) {
+    for (const auto &piece: targetPieces) {
+        pieces[piece] = HOME_SPOT;
     }
-    return false;
 }
