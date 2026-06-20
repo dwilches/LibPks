@@ -20,7 +20,6 @@ PksGameSnapshot PksGame::start() {
         throw PksException{"PksGame::start(): can't start a game that has already started."};
     }
 
-    gameBoard.clear();
     currentPlayer = &playerColors[0];
     gameState = PksGameState::GameInCourse;
 
@@ -35,16 +34,6 @@ PksGameSnapshot PksGame::start(const PksGameSnapshot &gameSnapshot) {
     currentPlayer = &playerColors[static_cast<int>(gameSnapshot.currentPlayer)];
 
     return getGameSnapshot();
-}
-
-//TODO: do I need this?
-void PksGame::stop() {
-    validateGameInCourse("PksGame::stop()");
-
-    gameBoard.clear();
-    currentPlayer = &playerColors[0];
-    gameState = PksGameState::GameNotStarted;
-    currentPlayer = nullptr;
 }
 
 PksDiceResult PksGame::rollDice() {

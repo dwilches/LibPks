@@ -13,12 +13,6 @@ PksGameBoard::PksGameBoard(const std::vector<PksColor> &playerColors) {
     }
 }
 
-void PksGameBoard::clear() {
-    for (const auto color: boardPieces | std::views::keys) {
-        boardPieces[color] = std::vector(NUM_PIECES, HOME_SPOT);
-    }
-}
-
 PksPiecesByPlayer PksGameBoard::getPieces() const {
     return boardPieces;
 }

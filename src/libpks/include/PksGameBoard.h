@@ -16,8 +16,6 @@ class PksGameBoard {
 public:
     explicit PksGameBoard(const std::vector<PksColor>& playerColors);
 
-    void clear();
-
     // Returns a copy of the location of every piece of every player
     [[nodiscard]] PksPiecesByPlayer getPieces() const;
 

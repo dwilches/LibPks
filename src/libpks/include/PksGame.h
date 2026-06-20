@@ -65,9 +65,6 @@ public:
     // Useful for tests
     PksGameSnapshot start(const PksGameSnapshot& gameSnapshot);
 
-    // Ends an ongoing game, so the same PksGame instance can be used to start a new game later
-    void stop();
-
     // Invoked to roll 2 random dice
     PksDiceResult rollDice();
 
