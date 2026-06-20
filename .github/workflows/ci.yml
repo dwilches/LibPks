@@ -3,12 +3,25 @@ name: CI
 on:
   push:
     branches: [ main ]
+    paths:
+      - .github/workflows/ci.yml
+      - src
+      - tests
+      - CMakeLists.txt
+
   pull_request:
     branches: [ main ]
+
   # Allow manual runs
   workflow_dispatch:
+
   # Allow to be invoked from other workflows
   workflow_call:
+    inputs:
+      is_workflow_call:
+        type: boolean
+        default: true
+        required: false
 
 jobs:
   build-test-release:
@@ -38,3 +51,13 @@ jobs:
         run: |
           cmake --build build --target sample_app
           ./build/src/apps/sample_app
+
+      # Upload build artifacts so release.yml can use them
+      - name: Upload build artifact
+        if: ${{ inputs.is_workflow_call }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: libpks-build
+          path: ./build/src/libpks/liblibpks.a
+          overwrite: true
+          retention-days: 1

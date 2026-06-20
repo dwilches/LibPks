@@ -4,25 +4,37 @@ on:
   # Allow manual runs
   workflow_dispatch:
 
+# To allow pushing a new commit
 permissions:
   contents: write
 
 jobs:
-  call-build-test-workflow:
+  ci:
     uses: ./.github/workflows/ci.yml
 
   release:
+    needs: ci
     runs-on: ubuntu-latest
 
     steps:
-      - name: Copy libpks build artifacts to dist folder
-        run: |
-          mkdir -p dist
-          cp ./build/src/libpks/liblibpks.a dist/libpks.a
-          
-          mkdir -p dist/include
-          cp src/libpks/include/public/LibPks.h dist/include
+      - name: Checkout code
+        uses: actions/checkout@v3
 
+      - name: Remove old dist/ folder content
+        run: rm -fr dist/
+
+      # Artifacts uploaded by ci.yml
+      - name: Download build artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: libpks-build
+          path: dist/
+
+      - name: Copy libpks build artifacts created by ci.yml to dist folder
+        run: |
+          mv dist/liblibpks.a dist/libpks.a
+          cp -r src/libpks/include dist/
+        
           # Push new artifacts to the main branch
           git config --global user.name "${{ github.actor }}"
           git config --global user.email "${{ github.actor }}@users.noreply.github.com"

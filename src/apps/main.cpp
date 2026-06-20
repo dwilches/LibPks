@@ -12,7 +12,6 @@ int main() {
     std::cout << " * This library can be used as the brain of your UI Parques implementations." << std::endl;
     std::cout << " */" << std::endl << std::endl;
 
-    PksDiceRoller roller;
     PksGame game;
     auto gameState = game.start();
     std::cout << "CurrentPlayer is " << gameState.currentPlayer << std::endl;

@@ -183,6 +183,6 @@ void PksGame::validateGameInCourse(const std::string &methodName) const {
     }
 
     std::ostringstream oss;
-    oss << methodName << ": Expected game to be in course, but it was [ " << gameState << "]";
+    oss << methodName << ": Expected game to be in course, but it was [" << gameState << "]";
     throw PksException{oss.str()};
 }
