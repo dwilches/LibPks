@@ -9,7 +9,6 @@
  * each dice has been used.
  */
 class PksDiceResult {
-
     // Contains the values of 2 dice, from 1-6
     PksDicePair dicePair;
 

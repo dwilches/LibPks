@@ -34,7 +34,6 @@ typedef std::pair<DICE_VAL, DICE_VAL> PksDicePair;
 typedef std::map<PksColor, std::vector<int> > PksPiecesByPlayer;
 
 class PksGame {
-
 public:
     PksGame();
 
@@ -50,7 +49,7 @@ public:
     // Capturing a piece is mandatory: when a player misses the opportunity to capture a piece, then their own piece
     // is punished by sending it home (but only if another player catches the mistake).
     // Returns `true` if the snitch was valid.
-    bool snitchOnPlayer(const PksColor& snitched, const std::set<PIECE_IDX>& pieces);
+    bool snitchOnPlayer(const PksColor &snitched, const std::set<PIECE_IDX> &pieces);
 
     // Returns the current location of every piece of the game, as well as whether the game has finished and who the
     // current player is.

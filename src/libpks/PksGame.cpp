@@ -51,7 +51,7 @@ PksDiceResult PksGame::rollDice() {
 
     lastRollDiceResult = std::make_unique<PksDiceResult>(diceRoll);
     numConsecutiveDiceRolls++;
-    snitchablePieces = nullptr; // The ability to snitch on a player ends the next time dice are rolled
+    snitcher = nullptr; // The ability to snitch on a player ends the next time dice are rolled
 
     if (lastRollDiceResult->isDoubles()) {
         // If the player doesn't have any piece at play, they need doubles before being allowed to use the dice.
@@ -87,7 +87,11 @@ PksDiceResult PksGame::rollDice() {
 
     // If the user has an option to use dice, then using them unwisely can get them snitched
     if (!lastRollDiceResult->allDiceUsed()) {
-        snitchablePieces = std::make_unique<PksSnitcher>(gameBoard, *currentPlayer, diceRoll);
+        auto possibleSnitcher = std::make_unique<PksSnitcher>(gameBoard, *currentPlayer, diceRoll);
+        // If there is no optimal move, snitch is not possible
+        if (!possibleSnitcher->getOptimalMoves().empty()) {
+            snitcher = std::move(possibleSnitcher);
+        }
     }
 
     // Return a copy of the dice result (we don't want the user to tamper with our library's internals)
@@ -111,6 +115,9 @@ PksGameSnapshot PksGame::useDice(const int diceValue, const int numPiece) {
 
     moveCurrentPlayerPiece(numPiece, diceValue);
     lastRollDiceResult->markDiceAsUsed(diceValue);
+    if (snitcher) {
+        snitcher->reportDiceUsed(diceValue, numPiece);
+    }
 
     const bool canRollAgain = lastRollDiceResult->isDoubles() && numConsecutiveDiceRolls != MAX_DICE_ROLLS;
     if (lastRollDiceResult->allDiceUsed() && !canRollAgain) {
@@ -124,13 +131,13 @@ PksGameSnapshot PksGame::useDice(const int diceValue, const int numPiece) {
 bool PksGame::snitchOnPlayer(const PksColor &snitched, const std::set<PIECE_IDX> &pieces) {
     validateGameInCourse("PksGame::snitchOnPlayer()");
 
-    if (!snitchablePieces || !snitchablePieces->isSnitchValid(snitched, pieces)) {
+    if (!snitcher || !snitcher->isSnitchValid(snitched, pieces)) {
         return false;
     }
 
     // Successful snitch
-    const auto snitchedColor = snitchablePieces->getSnitchablePlayer();
-    gameBoard.movePiecesHome(snitchedColor, snitchablePieces->getSnitchablePieces());
+    const auto snitchedColor = snitcher->getSnitchablePlayer();
+    gameBoard.movePiecesHome(snitchedColor, snitcher->getSnitchablePieces());
     return true;
 }
 
@@ -139,7 +146,8 @@ PksGameSnapshot PksGame::getGameSnapshot() const {
         .piecesByPlayer = gameBoard.getPieces(),
         .currentPlayer = *currentPlayer,
         .gameState = gameState,
-        .snitchablePieces = snitchablePieces ? snitchablePieces->getSnitchablePieces() : std::set<PIECE_IDX>{},
+        .snitchablePieces = snitcher ? snitcher->getSnitchablePieces() : std::set<PIECE_IDX>{},
+        .optimalMoves = snitcher ? snitcher->getOptimalMoves() : PksDMoveSet{},
     };
 }
 
@@ -148,7 +156,8 @@ bool PksGame::moveCurrentPlayerPiece(const PIECE_IDX pieceIdx, const int numSpot
     const int currentSpotIdx = gameBoard.getSpotForPiece(*currentPlayer, pieceIdx);
     if (currentSpotIdx == FINAL_TARGET_SPOT || currentSpotIdx == HOME_SPOT) {
         throw PksException{
-            "PksGame::moveCurrentPlayerPiece(): Attempted to move a piece that is out of play: " + std::to_string(pieceIdx)
+            "PksGame::moveCurrentPlayerPiece(): Attempted to move a piece that is out of play: " +
+                std::to_string(pieceIdx)
         };
     }
     const int numCaptured = gameBoard.movePiece(*currentPlayer, pieceIdx, numSpots);

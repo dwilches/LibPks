@@ -34,10 +34,10 @@ class PksGame {
     int numConsecutiveDiceRolls = 0;
 
     // Naked pointer as it won't be our responsibility to free it up
-    const PksColor* currentPlayer = nullptr;
+    const PksColor *currentPlayer = nullptr;
 
     // When a player loses the opportunity to capture a piece, another player can snitch on them.
-    std::unique_ptr<PksSnitcher> snitchablePieces = nullptr;
+    std::unique_ptr<PksSnitcher> snitcher = nullptr;
 
     // Keeps track of the last dice values and whether they have already been used
     std::unique_ptr<PksDiceResult> lastRollDiceResult = nullptr;
@@ -59,7 +59,7 @@ public:
     PksGameSnapshot start();
 
     // Useful for tests
-    PksGameSnapshot start(const PksGameSnapshot& gameSnapshot);
+    PksGameSnapshot start(const PksGameSnapshot &gameSnapshot);
 
     // Invoked to roll 2 random dice
     PksDiceResult rollDice();
@@ -70,7 +70,7 @@ public:
     // Capturing a piece is mandatory: when a player misses the opportunity to capture a piece, then their own piece
     // is punished by sending it home (but only if another player catches the mistake).
     // Returns `true` if the snitch was valid.
-    bool snitchOnPlayer(const PksColor& snitched, const std::set<PIECE_IDX>& pieces);
+    bool snitchOnPlayer(const PksColor &snitched, const std::set<PIECE_IDX> &pieces);
 
     // Returns the current location of every piece of the game, as well as whether the game has finished and who the
     // current player is.

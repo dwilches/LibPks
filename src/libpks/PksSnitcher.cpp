@@ -1,6 +1,7 @@
 #include "PksSnitcher.h"
 
 #include <algorithm>
+#include <iostream>
 #include <numeric>
 #include <ranges>
 
@@ -27,6 +28,10 @@ PksColor PksSnitcher::getSnitchablePlayer() const {
 }
 
 std::set<PIECE_IDX> PksSnitcher::getSnitchablePieces() const {
+    if (!playerCanBeSnitchedNow) {
+        return {};
+    }
+
     std::set<PIECE_IDX> snitchedPieces;
     for (const auto &moves: optimalMoves) {
         for (const auto &move: moves) {
@@ -40,7 +45,7 @@ PksDMoveSet PksSnitcher::getOptimalMoves() const {
     return optimalMoves;
 }
 
-PksDMoveSet PksSnitcher::getOptimalCapturingMoves(const PksDMoveSet& capturingMoves) {
+PksDMoveSet PksSnitcher::getOptimalCapturingMoves(const PksDMoveSet &capturingMoves) {
     PksDMoveSet possibleOptimalMoves;
     int maxTotalCaptured = 0;
 
@@ -80,18 +85,30 @@ void PksSnitcher::reportDiceUsed(const DICE_VAL diceValue, const PIECE_IDX piece
         // If this is just the first dice, then check if this move could be the first move of any optimal move.
         // Otherwise, the player can be snitched.
         for (const auto &moveSequence: optimalMoves) {
-            if (moveSequence[0] == actualMoves[0]) {
+            if (moveSequence[0].diceValue == actualMoves[0].diceValue &&
+                moveSequence[0].pieceIdx == actualMoves[0].pieceIdx) {
                 // Nothing more to do, the player cannot be snitched
                 return;
             }
         }
-        playerCanBeSnitchedNow = true;
     }
+
+    // If the dice was not needed for the first move of any optimal move, check if at least there are 1-dice optimal
+    // moves that don't involve this dice
+    for (const auto &moveSequence: optimalMoves) {
+        if (moveSequence.size() == 1 && moveSequence[0].diceValue != diceValue) {
+            // As there is an optimal move that doesn't involve this dice, then it's ok to have used it elsewhere
+            return;
+        }
+    }
+
+    playerCanBeSnitchedNow = true;
 }
 
 bool PksSnitcher::isSnitchValid(const PksColor &snitchedPlayer,
                                 const std::set<PIECE_IDX> &snitchedPieces) const {
-    return snitchedPlayer == currentPlayer &&
+    return playerCanBeSnitchedNow &&
+           snitchedPlayer == currentPlayer &&
            std::ranges::includes(getSnitchablePieces(), snitchedPieces);
 }
 

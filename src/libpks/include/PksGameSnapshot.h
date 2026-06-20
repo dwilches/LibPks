@@ -1,10 +1,11 @@
-#ifndef LIBPKS_PKSGAMESNPASHOT_H
-#define LIBPKS_PKSGAMESNPASHOT_H
+#ifndef LIBPKS_PKSGAMESNAPSHOT_H
+#define LIBPKS_PKSGAMESNAPSHOT_H
 
 #include <set>
 
 #include "PksColor.h"
 #include "PksGameState.h"
+#include "PksMoves.h"
 #include "PksTypeDefs.h"
 
 struct PksGameSnapshot {
@@ -12,6 +13,7 @@ struct PksGameSnapshot {
     PksColor currentPlayer = PksColor::Yellow;
     PksGameState gameState = PksGameState::GameNotStarted;
     std::set<PIECE_IDX> snitchablePieces;
+    PksDMoveSet optimalMoves;
 };
 
-#endif //LIBPKS_PKSGAMESNPASHOT_H
+#endif //LIBPKS_PKSGAMESNAPSHOT_H

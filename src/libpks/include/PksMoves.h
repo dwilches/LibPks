@@ -17,7 +17,7 @@ struct PksSMove {
     auto operator<=>(const PksSMove &other) const = default;
 };
 
-// A sequence of 2 single moves. Order matters. It means a player has used 2 dice to make this play.
+// A sequence of either 1 PksSMove, or 2 PksSMoves. Order matters.
 typedef std::vector<PksSMove> PksDMove;
 
 // Collection of alternative DMoves a user can do.
