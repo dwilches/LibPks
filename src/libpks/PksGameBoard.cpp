@@ -1,4 +1,4 @@
-#include "PksGameBoard.h"
+#include "include/PksGameBoard.h"
 
 #include "PksConstants.h"
 #include "PksException.h"
@@ -16,7 +16,7 @@ int PksGameBoard::movePiece(PksPiecesByPlayer &board,
     }
 
     // Move the player's piece to the target spot
-    const SPOT_NUM targetSpot = std::min(playerPieces[pieceIdx] + diceVal, FINAL_TARGET_SPOT);
+    const SPOT_IDX targetSpot = std::min(playerPieces[pieceIdx] + diceVal, FINAL_TARGET_SPOT);
     playerPieces[pieceIdx] = targetSpot;
 
     // If the spot is not shared unsafe, there is nothign we can capture

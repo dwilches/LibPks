@@ -2,6 +2,7 @@
 #define LIBPKS_PKSDICERESULT_H
 
 #include "PksException.h"
+#include "PksTypeDefs.h"
 
 /**
  * This class represents an instance of a dice roll (it holds the value of each dice) and also keeps track of whether
@@ -10,15 +11,15 @@
 class PksDiceResult {
 
     // Contains the values of 2 dice, from 1-6
-    std::pair<int, int> dicePair;
+    PksDicePair dicePair;
 
     // Whether the player already used each of the dice.
     std::pair<bool, bool> isDiceUsed;
 
 public:
-    explicit PksDiceResult(const std::pair<int, int> &dicePair);
+    explicit PksDiceResult(const PksDicePair &dicePair);
 
-    [[nodiscard]] std::pair<int, int> getDice() const;
+    [[nodiscard]] PksDicePair getDice() const;
 
     // Rolling 2 dice with the same value (a.k.a. doubles) has special properties in the game.
     [[nodiscard]] bool isDoubles() const;

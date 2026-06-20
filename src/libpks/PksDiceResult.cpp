@@ -1,10 +1,10 @@
 #include "PksDiceResult.h"
 
-PksDiceResult::PksDiceResult(const std::pair<int, int> &dicePair)
+PksDiceResult::PksDiceResult(const PksDicePair &dicePair)
     : dicePair{dicePair} {
 }
 
-std::pair<int, int> PksDiceResult::getDice() const {
+PksDicePair PksDiceResult::getDice() const {
     return dicePair;
 }
 

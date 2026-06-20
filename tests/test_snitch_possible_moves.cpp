@@ -4,14 +4,16 @@
 
 #include "MockDiceRoller.h"
 #include "PksConstants.h"
-#include "PksSnitchablePieces.h"
+#include "PksSnitcher.h"
 #include "src/TestBoards.h"
 
-PossibleMovesSingleDice getPossibleMoves(const PksPiecesByPlayer &board,
-                                         const PksColor currentPlayer,
-                                         const DICE_VAL diceValue) {
-    auto movesWithBoards = PksSnitchablePieces::getPossibleMoves(board, currentPlayer, diceValue);
-    PossibleMovesSingleDice moves;
+typedef std::set<PksSMove> PksSMoveSet;
+
+PksSMoveSet getPossibleMoves(const PksPiecesByPlayer &board,
+                             const PksColor currentPlayer,
+                             const DICE_VAL diceValue) {
+    auto movesWithBoards = PksSnitcher::getPossibleMoves(board, currentPlayer, diceValue);
+    PksSMoveSet moves;
     for (auto &move: movesWithBoards | std::views::keys) {
         moves.insert(move);
     }
@@ -27,7 +29,7 @@ TEST_CASE("Can capture a single piece") {
     };
 
     REQUIRE(getPossibleMoves(board, PksColor::Red, 2) ==
-            PossibleMovesSingleDice{
+            PksSMoveSet{
             {0, 2, 0},
             {1, 2, 0},
             {2, 2, 0},
@@ -44,7 +46,7 @@ TEST_CASE("Can capture several pieces") {
     };
 
     REQUIRE(getPossibleMoves(board, PksColor::Red, 4) ==
-            PossibleMovesSingleDice{
+            PksSMoveSet{
             {0, 4, 0},
             {1, 4, 0},
             {2, 4, 0},
@@ -61,7 +63,7 @@ TEST_CASE("Several pieces can capture the same piece") {
     };
 
     REQUIRE(getPossibleMoves(board, PksColor::Red, 4) ==
-            PossibleMovesSingleDice{
+            PksSMoveSet{
             {0, 4, 0},
             {1, 4, 2}, // this one captures
             {2, 4, 0},
@@ -78,7 +80,7 @@ TEST_CASE("Several pieces can capture different pieces") {
     };
 
     REQUIRE(getPossibleMoves(board, PksColor::Red, 4) ==
-            PossibleMovesSingleDice{
+            PksSMoveSet{
             {0, 4, 3},
             {1, 4, 3},
             {2, 4, 1},
@@ -95,7 +97,7 @@ TEST_CASE("Can't capture from home nor the final stair") {
     };
 
     REQUIRE(getPossibleMoves(board, PksColor::Red, 2) ==
-            PossibleMovesSingleDice{
+            PksSMoveSet{
             {1, 2, 0}, // Only the piece at start can move
             });
 }
@@ -109,7 +111,7 @@ TEST_CASE("Can capture pieces from different players") {
     };
 
     REQUIRE(getPossibleMoves(board, PksColor::Green, 1) ==
-            PossibleMovesSingleDice{
+            PksSMoveSet{
             {0, 1, 2},
             });
 }

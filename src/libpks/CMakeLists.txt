@@ -4,15 +4,11 @@ add_library(libpks STATIC
         PksDiceRoller.cpp
         PksException.cpp
         PksPlayer.cpp
-        PksColor.cpp
         PksUtils.cpp
-        PksGameState.cpp
         PksDiceResult.cpp
-        PksSnitchablePieces.cpp
-        include/PksSnitchablePieces.h
-        include/PksTypeDefs.h
+        PksSnitcher.cpp
         PksGameBoard.cpp
-        PksGameBoard.h
+        PksLogUtils.cpp
 )
 
 target_include_directories(libpks

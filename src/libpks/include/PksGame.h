@@ -8,7 +8,7 @@
 #include "PksPlayer.h"
 #include "PksDiceResult.h"
 #include "PksGameSnapshot.h"
-#include "PksSnitchablePieces.h"
+#include "PksSnitcher.h"
 
 /**
  * Every Parqués piece can be in one of 73 different spots. To simplify the implementation, I chose these numbers for
@@ -37,7 +37,7 @@ class PksGame {
     const PksColor* currentPlayer = nullptr;
 
     // When a player loses the opportunity to capture a piece, another player can snitch on them.
-    std::unique_ptr<PksSnitchablePieces> snitchablePieces = nullptr;
+    std::unique_ptr<PksSnitcher> snitchablePieces = nullptr;
 
     // Keeps track of the last dice values and whether they have already been used
     std::unique_ptr<PksDiceResult> lastRollDiceResult = nullptr;

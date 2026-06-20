@@ -2,6 +2,7 @@
 #define LIBPKS_PKSDICEROLLER_H
 
 #include <random>
+#include "PksTypeDefs.h"
 
 /**
  * Small implementation of a random dice.
@@ -17,7 +18,7 @@ public:
     virtual ~PksDiceRoller() = default;
 
     // Returns 2 numbers between 1 and 6, equivalent to rolling 2 dice in the game.
-    std::pair<int, int> rollNewPair();
+    PksDicePair rollNewPair();
 
     // Useful for mocking in tests
     virtual int nextRandomNumber();
