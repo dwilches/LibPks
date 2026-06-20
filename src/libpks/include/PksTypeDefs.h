@@ -1,6 +1,11 @@
 #ifndef LIBPKS_PKSTYPEDEFS_H
 #define LIBPKS_PKSTYPEDEFS_H
 
+#include <map>
+#include <vector>
+
+#include "PksColor.h"
+
 // Identifies each of the spots of the board. Can contain numbers between -1 (HOME_SPOT) and 71 (FINAL_TARGET_SPOT)
 typedef int SPOT_IDX;
 
@@ -14,5 +19,7 @@ typedef int DICE_IDX;
 typedef int DICE_VAL;
 
 typedef std::pair<DICE_VAL, DICE_VAL> PksDicePair;
+
+typedef std::map<PksColor, std::vector<int> > PksPiecesByPlayer;
 
 #endif //LIBPKS_PKSTYPEDEFS_H

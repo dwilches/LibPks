@@ -6,7 +6,6 @@
 
 #include "PksConstants.h"
 #include "include/PksGameBoard.h"
-#include "PksPlayer.h"
 #include "PksUtils.h"
 
 PksSnitcher::PksSnitcher(const PksPiecesByPlayer &piecesByPlayer,

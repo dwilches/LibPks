@@ -28,5 +28,4 @@
 // Maximum number of double rolls allowed
 #define MAX_DICE_ROLLS 3
 
-
 #endif //LIBPKS_PKSCONSTANTS_H

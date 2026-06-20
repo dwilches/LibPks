@@ -8,11 +8,11 @@
 #include "PksUtils.h"
 
 // This array implicitly establishes the sequence of player turns
-static constexpr PksColor playerColors[] = {
+static const std::vector playerColors{
     PksColor::Yellow, PksColor::Red, PksColor::Green, PksColor::Blue,
 };
 
-PksGame::PksGame(PksDiceRoller &diceRoller) : diceRoller{diceRoller} {
+PksGame::PksGame(PksDiceRoller &diceRoller) : gameBoard{playerColors}, diceRoller{diceRoller} {
 }
 
 PksGameSnapshot PksGame::start() {
@@ -20,13 +20,10 @@ PksGameSnapshot PksGame::start() {
         throw PksException{"PksGame::start(): can't start a game that has already started."};
     }
 
+    gameBoard.clear();
     currentPlayer = &playerColors[0];
-    players.clear();
-    for (auto color: playerColors) {
-        players.insert({color, {}});
-    }
-
     gameState = PksGameState::GameInCourse;
+
     return getGameSnapshot();
 }
 
@@ -34,18 +31,18 @@ PksGameSnapshot PksGame::start() {
 PksGameSnapshot PksGame::start(const PksGameSnapshot &gameSnapshot) {
     start();
 
+    gameBoard.setPieces(gameSnapshot.piecesByPlayer);
     currentPlayer = &playerColors[static_cast<int>(gameSnapshot.currentPlayer)];
-    for (const auto &[color, newPieces]: gameSnapshot.piecesByPlayer) {
-        players[color] = PksPlayer{newPieces};
-    }
 
     return getGameSnapshot();
 }
 
+//TODO: do I need this?
 void PksGame::stop() {
     validateGameInCourse("PksGame::stop()");
 
-    players.clear();
+    gameBoard.clear();
+    currentPlayer = &playerColors[0];
     gameState = PksGameState::GameNotStarted;
     currentPlayer = nullptr;
 }
@@ -70,8 +67,8 @@ PksDiceResult PksGame::rollDice() {
     if (lastRollDiceResult->isDoubles()) {
         // If the player doesn't have any piece at play, they need doubles before being allowed to use the dice.
         // If there was at least one piece at home, the dice is implicitly used to take them out of there.
-        if (players.at(*currentPlayer).anyPieceAtHome()) {
-            players.at(*currentPlayer).moveAllPiecesOutOfHome();
+        if (gameBoard.anyPieceAtSpot(*currentPlayer, HOME_SPOT)) {
+            gameBoard.moveAllPiecesOutOfHome(*currentPlayer);
 
             // The dice roll cannot be used for anything else
             lastRollDiceResult->setDiceCannotBeUsed();
@@ -84,7 +81,7 @@ PksDiceResult PksGame::rollDice() {
 
         // Doubles is good luck until it's 3 in a row, all pieces in play move back home
         if (numConsecutiveDiceRolls == MAX_DICE_ROLLS) {
-            players.at(*currentPlayer).moveAllPlayingPiecesHome();
+            gameBoard.moveAllPlayingPiecesHome(*currentPlayer);
             // The player loses the possibility of using this dice
             lastRollDiceResult->setDiceCannotBeUsed();
 
@@ -92,7 +89,7 @@ PksDiceResult PksGame::rollDice() {
         }
     } else {
         // Can only use a non-doubles roll if there is at least 1 piece in play
-        if (players.at(*currentPlayer).allPlayingPiecesAtHome()) {
+        if (gameBoard.allPlayingPiecesAtHome(*currentPlayer)) {
             lastRollDiceResult->setDiceCannotBeUsed();
 
             if (numConsecutiveDiceRolls == MAX_DICE_ROLLS) {
@@ -105,8 +102,8 @@ PksDiceResult PksGame::rollDice() {
     if (!lastRollDiceResult->allDiceUsed()) {
         const auto &gameSnapshot = getGameSnapshot();
         snitchablePieces = std::make_unique<PksSnitcher>(gameSnapshot.piecesByPlayer,
-                                                                 *currentPlayer,
-                                                                 diceRoll);
+                                                         *currentPlayer,
+                                                         diceRoll);
     }
 
     // Return a copy of the dice result (we don't want the user to tamper with our library's internals)
@@ -149,17 +146,13 @@ bool PksGame::snitchOnPlayer(const PksColor &snitched, const std::set<PIECE_IDX>
 
     // Successful snitch
     const auto snitchedColor = snitchablePieces->getSnitchablePlayer();
-    players.at(snitchedColor).movePiecesHome(snitchablePieces->getSnitchablePieces());
+    gameBoard.movePiecesHome(snitchedColor, snitchablePieces->getSnitchablePieces());
     return true;
 }
 
 PksGameSnapshot PksGame::getGameSnapshot() const {
-    PksPiecesByPlayer allPieces;
-    for (auto &[color, player]: players) {
-        allPieces[color] = player.getPieces();
-    }
     return {
-        .piecesByPlayer = allPieces,
+        .piecesByPlayer = gameBoard.getPieces(),
         .currentPlayer = *currentPlayer,
         .gameState = gameState,
         .snitchablePieces = snitchablePieces ? snitchablePieces->getSnitchablePieces() : std::set<PIECE_IDX>{},
@@ -169,10 +162,10 @@ PksGameSnapshot PksGame::getGameSnapshot() const {
 // Returns true if any piece was captured
 bool PksGame::moveCurrentPlayerPiece(const int piece, const int numSpots) {
     // New position in player local numbering
-    const int newPos = players.at(*currentPlayer).movePiece(piece, numSpots);
+    const int newPos = gameBoard.movePiece(*currentPlayer, piece, numSpots);
 
     const auto spotType = PksUtils::getSpotType(newPos);
-    if (spotType == PksSpotType::Goal && players.at(*currentPlayer).allPiecesAtTarget()) {
+    if (spotType == PksSpotType::Goal && gameBoard.allPiecesAtTarget(*currentPlayer)) {
         gameState = PksGameState::GameOver;
         return false;
     }
@@ -195,7 +188,7 @@ bool PksGame::moveHomeAllPiecesAtSpot(const int spot) {
         }
 
         const int otherPlayersSpot = PksUtils::convertSpotNumber(*currentPlayer, otherColor, spot);
-        anyPieceCaptured = players.at(otherColor).movePiecesHomeIfAtSpot(otherPlayersSpot) || anyPieceCaptured;
+        anyPieceCaptured = gameBoard.movePiecesHomeIfAtSpot(otherColor, otherPlayersSpot) || anyPieceCaptured;
     }
     return anyPieceCaptured;
 }

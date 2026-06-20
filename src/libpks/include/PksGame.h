@@ -5,8 +5,8 @@
 #include <set>
 
 #include "PksDiceRoller.h"
-#include "PksPlayer.h"
 #include "PksDiceResult.h"
+#include "PksGameBoard.h"
 #include "PksGameSnapshot.h"
 #include "PksSnitcher.h"
 
@@ -28,7 +28,7 @@
  * position 55, then Player 1's piece is captured and sent to jail. This is more clearly seen in the README images.
  */
 class PksGame {
-    std::map<PksColor, PksPlayer> players;
+    PksGameBoard gameBoard;
     PksDiceRoller &diceRoller;
     PksGameState gameState = PksGameState::GameNotStarted;
     int numConsecutiveDiceRolls = 0;

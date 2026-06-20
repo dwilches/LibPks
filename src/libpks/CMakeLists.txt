@@ -1,13 +1,12 @@
 
 add_library(libpks STATIC
         PksGame.cpp
+        PksGameBoard.cpp
         PksDiceRoller.cpp
         PksException.cpp
-        PksPlayer.cpp
         PksUtils.cpp
         PksDiceResult.cpp
         PksSnitcher.cpp
-        PksGameBoard.cpp
         PksLogUtils.cpp
 )
 
