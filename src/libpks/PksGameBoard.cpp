@@ -13,8 +13,16 @@ PksGameBoard::PksGameBoard(const std::vector<PksColor> &playerColors) {
     }
 }
 
+PksGameBoard::PksGameBoard(const PksPiecesByPlayer &playerColors) {
+    boardPieces = playerColors;
+}
+
 PksPiecesByPlayer PksGameBoard::getPieces() const {
     return boardPieces;
+}
+
+SPOT_IDX PksGameBoard::getSpotForPiece(const PksColor color, const PIECE_IDX pieceIdx) const {
+    return boardPieces.at(color)[pieceIdx];
 }
 
 void PksGameBoard::setPieces(const PksPiecesByPlayer &sourcePieces) {
@@ -44,6 +52,16 @@ void PksGameBoard::moveAllPiecesOutOfHome(const PksColor color) {
             piece = START_SPOT;
         }
     }
+
+    // Capture all pieces that were walking by our Home
+    for (const auto &otherPlayerColor: boardPieces | std::views::keys) {
+        // Ignore current player
+        if (otherPlayerColor == color) {
+            continue;
+        }
+        const auto &otherSpotIdx = PksUtils::convertSpotNumber(color, otherPlayerColor, START_SPOT);
+        movePiecesHomeIfAtSpot(otherPlayerColor, otherSpotIdx);
+    }
 }
 
 void PksGameBoard::moveAllPlayingPiecesHome(const PksColor color) {
@@ -57,15 +75,28 @@ void PksGameBoard::moveAllPlayingPiecesHome(const PksColor color) {
 
 int PksGameBoard::movePiece(const PksColor color, const PIECE_IDX pieceIdx, const int numSpots) {
     auto &pieces = boardPieces.at(color);
-    if (pieces[pieceIdx] == FINAL_TARGET_SPOT || pieces[pieceIdx] == HOME_SPOT) {
-        throw PksException{
-            "PksGameBoard::movePiece(): Attempted to move a piece that is out of play: " + std::to_string(pieceIdx)
-        };
+
+    // Move the player's piece to the target spot
+    const auto newSpotIdx = std::min(pieces[pieceIdx] + numSpots, FINAL_TARGET_SPOT);
+    pieces[pieceIdx] = newSpotIdx;
+
+    // If the spot is not shared unsafe, there is nothing we can capture
+    if (PksUtils::getSpotType(newSpotIdx) != PksSpotType::UnsafeShared) {
+        return 0;
     }
 
-    const int newSpotIdx = std::min(pieces[pieceIdx] + numSpots, FINAL_TARGET_SPOT);
-    pieces[pieceIdx] = newSpotIdx;
-    return newSpotIdx;
+    // Capture any pieces that are at the target spot
+    int numCaptured = 0;
+    for (const auto &otherPlayerColor: boardPieces | std::views::keys) {
+        // Ignore current player
+        if (otherPlayerColor == color) {
+            continue;
+        }
+
+        const auto &otherSpotIdx = PksUtils::convertSpotNumber(color, otherPlayerColor, newSpotIdx);
+        numCaptured += movePiecesHomeIfAtSpot(otherPlayerColor, otherSpotIdx);
+    }
+    return numCaptured;
 }
 
 void PksGameBoard::movePiecesHome(const PksColor color, const std::set<PIECE_IDX> &targetPiecesIdx) {
@@ -80,53 +111,12 @@ void PksGameBoard::movePiecesHome(const PksColor color, const std::set<PIECE_IDX
     }
 }
 
-bool PksGameBoard::movePiecesHomeIfAtSpot(const PksColor color, const SPOT_IDX spotIdx) {
-    bool anyPieceCaptured = false;
+int PksGameBoard::movePiecesHomeIfAtSpot(const PksColor color, const SPOT_IDX spotIdx) {
+    int numCaptured = 0;
     for (auto &piece: boardPieces.at(color)) {
         if (piece == spotIdx) {
             piece = HOME_SPOT;
-            anyPieceCaptured = true;
-        }
-    }
-    return anyPieceCaptured;
-}
-
-// This is a static method that acts on a given board, updating it in-place.
-int PksGameBoard::movePiece(PksPiecesByPlayer &board,
-                            const PksColor currentPlayer,
-                            const PIECE_IDX pieceIdx,
-                            const DICE_VAL diceVal) {
-    auto &playerPieces = board.at(currentPlayer);
-    if (playerPieces[pieceIdx] == FINAL_TARGET_SPOT || playerPieces[pieceIdx] == HOME_SPOT) {
-        throw PksException{
-            "PksGameBoard::movePiece(): Attempted to move a piece that is out of play: " + std::to_string(pieceIdx)
-        };
-    }
-
-    // Move the player's piece to the target spot
-    const SPOT_IDX targetSpot = std::min(playerPieces[pieceIdx] + diceVal, FINAL_TARGET_SPOT);
-    playerPieces[pieceIdx] = targetSpot;
-
-    // If the spot is not shared unsafe, there is nothign we can capture
-    if (PksUtils::getSpotType(targetSpot) != PksSpotType::UnsafeShared) {
-        return 0;
-    }
-
-    // Capture any pieces that are at the target spot
-    int numCaptured = 0;
-    for (auto &[otherPlayerColor, otherPlayerPieces]: board) {
-        if (otherPlayerColor == currentPlayer) {
-            continue;
-        }
-
-        const auto &otherSpot = PksUtils::convertSpotNumber(currentPlayer, otherPlayerColor, targetSpot);
-
-        // If the other player has any piece at the target spot, move them back home
-        for (auto &otherPlayerPiece: otherPlayerPieces) {
-            if (otherPlayerPiece == otherSpot) {
-                otherPlayerPiece = HOME_SPOT;
-                numCaptured++;
-            }
+            numCaptured++;
         }
     }
     return numCaptured;

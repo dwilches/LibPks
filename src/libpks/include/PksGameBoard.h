@@ -14,10 +14,15 @@ class PksGameBoard {
     PksPiecesByPlayer boardPieces;
 
 public:
-    explicit PksGameBoard(const std::vector<PksColor>& playerColors);
+    explicit PksGameBoard(const std::vector<PksColor> &playerColors);
+
+    // Mostly useful for tests.
+    explicit PksGameBoard(const PksPiecesByPlayer &);
 
     // Returns a copy of the location of every piece of every player
     [[nodiscard]] PksPiecesByPlayer getPieces() const;
+
+    [[nodiscard]] SPOT_IDX getSpotForPiece(PksColor, PIECE_IDX) const;
 
     // Allows setting arbitrary locations for every piece of every player.
     // Mostly useful for tests.
@@ -35,23 +40,18 @@ public:
     // Moves all playing pieces (e.g. pieces not at the final position) back home.
     void moveAllPlayingPiecesHome(PksColor);
 
-    // Moves a specific piece a number of spots. It validates the piece is not at home/target as those pieces can't be
-    // moved.
+    // Moves a piece a number of spots. It validates the piece is not at home/target as those pieces can't be moved.
+    // Foreign pieces in the target spot are captured.
+    // Returns the number of captured pieces.
     int movePiece(PksColor, PIECE_IDX, int numSpots);
 
     // Moves a group of pieces back home. It validates the pieces are in play.
     void movePiecesHome(PksColor, const std::set<PIECE_IDX> &);
 
+private:
     // Invoked when a player falls in this spot, so all pieces of other players at that spot need to go home.
-    // Returns true if any piece was captured.
-    bool movePiecesHomeIfAtSpot(PksColor, SPOT_IDX);
-
-    //region Other methods that should be private but are exposed for tests
-
-    // Returns the number of captured pieces and updates the given board in place
-    static int movePiece(PksPiecesByPlayer &board, PksColor currentPlayer, PIECE_IDX pieceIdx, DICE_VAL diceVal);
-
-    //endregion
+    // Returns the number of pieces captured.
+    int movePiecesHomeIfAtSpot(PksColor, SPOT_IDX);
 };
 
 #endif //LIBPKS_PKSGAMEBOARD_H

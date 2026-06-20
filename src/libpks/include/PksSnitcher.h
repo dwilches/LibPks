@@ -51,18 +51,18 @@ public:
     //region Other methods that should be private but are exposed for tests
 
     [[nodiscard]] static PksDMoveSet
-    getCapturingMoves(const PksPiecesByPlayer &piecesByPlayer,
+    getCapturingMoves(const PksGameBoard &gameBoard,
                       const PksColor &currentPlayer,
                       const PksDicePair &dicePair);
 
     [[nodiscard]] static PksDMoveSet
-    getCapturingMoves(const PksPiecesByPlayer &piecesByPlayer,
+    getCapturingMoves(const PksGameBoard &gameBoard,
                       PksColor currentPlayer,
                       DICE_VAL firstDice,
                       DICE_VAL secondDice);
 
-    [[nodiscard]] static std::vector<std::pair<PksSMove, PksPiecesByPlayer> >
-    getPossibleMoves(const PksPiecesByPlayer &piecesByPlayer,
+    [[nodiscard]] static std::vector<std::pair<PksSMove, PksGameBoard> >
+    getPossibleMoves(const PksGameBoard &gameBoard,
                      const PksColor &currentPlayer,
                      const DICE_VAL &diceValue);
 

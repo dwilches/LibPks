@@ -9,7 +9,7 @@
 
 typedef std::set<PksSMove> PksSMoveSet;
 
-PksSMoveSet getPossibleMoves(const PksPiecesByPlayer &board,
+PksSMoveSet getPossibleMoves(const PksGameBoard &board,
                              const PksColor currentPlayer,
                              const DICE_VAL diceValue) {
     auto movesWithBoards = PksSnitcher::getPossibleMoves(board, currentPlayer, diceValue);
@@ -21,12 +21,12 @@ PksSMoveSet getPossibleMoves(const PksPiecesByPlayer &board,
 }
 
 TEST_CASE("Can capture a single piece") {
-    const auto board = PksPiecesByPlayer{
+    const auto board = PksGameBoard({
         {PksColor::Yellow, {17 + 1, 17 + 2, 17 + 3, 17 + 4}},
         {PksColor::Red, {10, 10, 10, START_SPOT}},
         {PksColor::Green, ALL_AT_HOME},
         {PksColor::Blue, ALL_AT_START},
-    };
+    });
 
     REQUIRE(getPossibleMoves(board, PksColor::Red, 2) ==
             PksSMoveSet{
@@ -38,12 +38,12 @@ TEST_CASE("Can capture a single piece") {
 }
 
 TEST_CASE("Can capture several pieces") {
-    const auto board = PksPiecesByPlayer{
+    const auto board = PksGameBoard({
         {PksColor::Yellow, {17 + 1, 17 + 2, 17 + 4, 17 + 4}},
         {PksColor::Red, {10, 10, 10, START_SPOT}},
         {PksColor::Green, ALL_AT_HOME},
         {PksColor::Blue, ALL_AT_START},
-    };
+    });
 
     REQUIRE(getPossibleMoves(board, PksColor::Red, 4) ==
             PksSMoveSet{
@@ -55,12 +55,12 @@ TEST_CASE("Can capture several pieces") {
 }
 
 TEST_CASE("Several pieces can capture the same piece") {
-    const auto board = PksPiecesByPlayer{
+    const auto board = PksGameBoard({
         {PksColor::Yellow, {17 + 1, 17 + 2, 17 + 4, 17 + 4}},
         {PksColor::Red, {10, START_SPOT, 10, START_SPOT}},
         {PksColor::Green, ALL_AT_HOME},
         {PksColor::Blue, ALL_AT_START},
-    };
+    });
 
     REQUIRE(getPossibleMoves(board, PksColor::Red, 4) ==
             PksSMoveSet{
@@ -72,12 +72,12 @@ TEST_CASE("Several pieces can capture the same piece") {
 }
 
 TEST_CASE("Several pieces can capture different pieces") {
-    const auto board = PksPiecesByPlayer{
+    const auto board = PksGameBoard({
         {PksColor::Yellow, {17 + 4, 17 + 15, 17 + 15, 17 + 15}},
         {PksColor::Red, {11, 11, START_SPOT, 12}},
         {PksColor::Green, ALL_AT_HOME},
         {PksColor::Blue, ALL_AT_HOME},
-    };
+    });
 
     REQUIRE(getPossibleMoves(board, PksColor::Red, 4) ==
             PksSMoveSet{
@@ -89,12 +89,12 @@ TEST_CASE("Several pieces can capture different pieces") {
 }
 
 TEST_CASE("Can't capture from home nor the final stair") {
-    const auto board = PksPiecesByPlayer{
+    const auto board = PksGameBoard({
         {PksColor::Yellow, ALL_AT_START},
         {PksColor::Red, {HOME_SPOT, START_SPOT, LAST_SHARED_SPOT, FINAL_TARGET_SPOT}},
         {PksColor::Green, ALL_AT_HOME},
         {PksColor::Blue, ALL_AT_START},
-    };
+    });
 
     REQUIRE(getPossibleMoves(board, PksColor::Red, 2) ==
             PksSMoveSet{
@@ -103,12 +103,12 @@ TEST_CASE("Can't capture from home nor the final stair") {
 }
 
 TEST_CASE("Can capture pieces from different players") {
-    const auto board = PksPiecesByPlayer{
+    const auto board = PksGameBoard({
         {PksColor::Yellow, {34 + 1, HOME_SPOT, HOME_SPOT, HOME_SPOT}},
         {PksColor::Red, {17 + 1, HOME_SPOT, HOME_SPOT, HOME_SPOT}},
         {PksColor::Green, {0, FINAL_TARGET_SPOT, FINAL_TARGET_SPOT, FINAL_TARGET_SPOT}},
         {PksColor::Blue, ALL_AT_HOME},
-    };
+    });
 
     REQUIRE(getPossibleMoves(board, PksColor::Green, 1) ==
             PksSMoveSet{

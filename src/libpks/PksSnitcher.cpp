@@ -15,7 +15,7 @@ PksSnitcher::PksSnitcher(const PksGameBoard &gameBoard,
       dicePair{dicePair},
       playerCanBeSnitchedNow{false} {
     // Gets every possible move where at least 1 capture is made
-    auto capturingMoves = getCapturingMoves(gameBoard.getPieces(), currentPlayer, dicePair);
+    auto capturingMoves = getCapturingMoves(gameBoard, currentPlayer, dicePair);
     if (!capturingMoves.empty()) {
         // Retain only the best moves
         optimalMoves = getOptimalCapturingMoves(capturingMoves);
@@ -97,25 +97,25 @@ bool PksSnitcher::isSnitchValid(const PksColor &snitchedPlayer,
 
 // Returns possible moves where at least one piece is captured
 PksDMoveSet
-PksSnitcher::getCapturingMoves(const PksPiecesByPlayer &piecesByPlayer,
+PksSnitcher::getCapturingMoves(const PksGameBoard &gameBoard,
                                const PksColor &currentPlayer,
                                const PksDicePair &dicePair) {
-    auto movesOrder1 = getCapturingMoves(piecesByPlayer, currentPlayer, dicePair.first, dicePair.second);
-    auto movesOrder2 = getCapturingMoves(piecesByPlayer, currentPlayer, dicePair.second, dicePair.first);
+    auto movesOrder1 = getCapturingMoves(gameBoard, currentPlayer, dicePair.first, dicePair.second);
+    auto movesOrder2 = getCapturingMoves(gameBoard, currentPlayer, dicePair.second, dicePair.first);
     movesOrder1.merge(movesOrder2);
     return movesOrder1;
 }
 
 // Returns possible moves where at least one piece is captured. Dice need to be used in this order.
 PksDMoveSet
-PksSnitcher::getCapturingMoves(const PksPiecesByPlayer &piecesByPlayer,
+PksSnitcher::getCapturingMoves(const PksGameBoard &gameBoard,
                                const PksColor currentPlayer,
                                const DICE_VAL firstDice,
                                const DICE_VAL secondDice) {
     PksDMoveSet capturingMoves;
 
     // Simulate moving the first dice first
-    const auto movesDice1 = getPossibleMoves(piecesByPlayer, currentPlayer, firstDice);
+    const auto movesDice1 = getPossibleMoves(gameBoard, currentPlayer, firstDice);
 
     // Then simulate moving the second dice for each of those first moves
     for (const auto &[move1, newBoard]: movesDice1) {
@@ -156,13 +156,13 @@ PksSnitcher::getCapturingMoves(const PksPiecesByPlayer &piecesByPlayer,
 }
 
 // Returns possible move even where no pieces are captured.
-std::vector<std::pair<PksSMove, PksPiecesByPlayer> >
-PksSnitcher::getPossibleMoves(const PksPiecesByPlayer &piecesByPlayer,
+std::vector<std::pair<PksSMove, PksGameBoard> >
+PksSnitcher::getPossibleMoves(const PksGameBoard &gameBoard,
                               const PksColor &currentPlayer,
                               const DICE_VAL &diceValue) {
-    const auto &thisPlayerPieces = piecesByPlayer.at(currentPlayer);
+    const auto thisPlayerPieces = gameBoard.getPieces().at(currentPlayer);
 
-    std::vector<std::pair<PksSMove, PksPiecesByPlayer> > possibleMoves;
+    std::vector<std::pair<PksSMove, PksGameBoard> > possibleMoves;
 
     // Check all pieces this dice can be used on, and calculate the resulting board.
     for (int thisPieceIdx = 0; thisPieceIdx < NUM_PIECES; thisPieceIdx++) {
@@ -173,8 +173,8 @@ PksSnitcher::getPossibleMoves(const PksPiecesByPlayer &piecesByPlayer,
         }
 
         // Duplicate board so we can update it
-        auto newBoard = piecesByPlayer;
-        const int numCaptured = PksGameBoard::movePiece(newBoard, currentPlayer, thisPieceIdx, diceValue);
+        auto newBoard = gameBoard;
+        const int numCaptured = newBoard.movePiece(currentPlayer, thisPieceIdx, diceValue);
         const PksSMove move = {
             .pieceIdx = thisPieceIdx,
             .diceValue = diceValue,

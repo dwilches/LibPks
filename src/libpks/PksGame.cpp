@@ -57,13 +57,11 @@ PksDiceResult PksGame::rollDice() {
         // If the player doesn't have any piece at play, they need doubles before being allowed to use the dice.
         // If there was at least one piece at home, the dice is implicitly used to take them out of there.
         if (gameBoard.anyPieceAtSpot(*currentPlayer, HOME_SPOT)) {
+            // If any piece was walking by our home, they're captured
             gameBoard.moveAllPiecesOutOfHome(*currentPlayer);
 
             // The dice roll cannot be used for anything else
             lastRollDiceResult->setDiceCannotBeUsed();
-
-            // Capture all pieces that were walking by our Home
-            moveHomeAllPiecesAtSpot(START_SPOT);
 
             nextPlayer();
         }
@@ -146,37 +144,22 @@ PksGameSnapshot PksGame::getGameSnapshot() const {
 }
 
 // Returns true if any piece was captured
-bool PksGame::moveCurrentPlayerPiece(const int piece, const int numSpots) {
-    // New position in player local numbering
-    const int newPos = gameBoard.movePiece(*currentPlayer, piece, numSpots);
+bool PksGame::moveCurrentPlayerPiece(const PIECE_IDX pieceIdx, const int numSpots) {
+    const int currentSpotIdx = gameBoard.getSpotForPiece(*currentPlayer, pieceIdx);
+    if (currentSpotIdx == FINAL_TARGET_SPOT || currentSpotIdx == HOME_SPOT) {
+        throw PksException{
+            "PksGame::moveCurrentPlayerPiece(): Attempted to move a piece that is out of play: " + std::to_string(pieceIdx)
+        };
+    }
+    const int numCaptured = gameBoard.movePiece(*currentPlayer, pieceIdx, numSpots);
+    const int newSpotIdx = gameBoard.getSpotForPiece(*currentPlayer, pieceIdx);
 
-    const auto spotType = PksUtils::getSpotType(newPos);
-    if (spotType == PksSpotType::Goal && gameBoard.allPiecesAtTarget(*currentPlayer)) {
+    if (PksUtils::getSpotType(newSpotIdx) == PksSpotType::Goal && gameBoard.allPiecesAtTarget(*currentPlayer)) {
         gameState = PksGameState::GameOver;
         return false;
     }
 
-    // Check if this player's piece has fallen into an unsafe shared spot occupied by other players' pieces, and
-    // capture them.
-    if (spotType == PksSpotType::UnsafeShared) {
-        return moveHomeAllPiecesAtSpot(newPos);
-    }
-    return false;
-}
-
-// Returns true if any piece was captured
-bool PksGame::moveHomeAllPiecesAtSpot(const int spot) {
-    bool anyPieceCaptured = false;
-    for (const auto &otherColor: playerColors) {
-        // Ignore the current player, only interested in other players
-        if (otherColor == *currentPlayer) {
-            continue;
-        }
-
-        const int otherPlayersSpot = PksUtils::convertSpotNumber(*currentPlayer, otherColor, spot);
-        anyPieceCaptured = gameBoard.movePiecesHomeIfAtSpot(otherColor, otherPlayersSpot) || anyPieceCaptured;
-    }
-    return anyPieceCaptured;
+    return numCaptured > 0;
 }
 
 void PksGame::validateGameInCourse(const std::string &methodName) const {

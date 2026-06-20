@@ -46,11 +46,7 @@ class PksGame {
     void validateGameInCourse(const std::string &methodName) const;
 
     // Returns true if any piece was captured.
-    bool moveCurrentPlayerPiece(int piece, int numSpots);
-
-    // Moves all pieces at this spot home, except the pieces of the current player.
-    // Returns true if any piece was captured.
-    bool moveHomeAllPiecesAtSpot(int spot);
+    bool moveCurrentPlayerPiece(PIECE_IDX pieceIdx, int numSpots);
 
     // Ends a player's turn and starts the next one
     void nextPlayer();
