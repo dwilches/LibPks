@@ -5,7 +5,7 @@
 #include "src/TestBoards.h"
 
 TEST_CASE("All pieces move out of home") {
-    MockDiceRoller mockDiceRoller;
+    auto mockDiceRoller = std::make_shared<MockDiceRoller>();
     PksGame game{mockDiceRoller};
 
     // The current player is not at Home
@@ -18,10 +18,10 @@ TEST_CASE("All pieces move out of home") {
     REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Yellow] == std::vector{-1, -1, -1, -1}); // all at home
 
     // Roll doubles to get out of home
-    mockDiceRoller.setNextRandomValues(6, 6);
+    mockDiceRoller->setNextRandomValues(6, 6);
     auto diceRoll = game.rollDice();
     REQUIRE(diceRoll.allDiceUsed()); // used to get out of home
-    REQUIRE(diceRoll.getDice() == std::pair{6, 6});
+    REQUIRE(diceRoll.getDice() == PksDicePair{6, 6});
 
     gameSnapshot = game.getGameSnapshot();
     REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Yellow] == std::vector{0, 0, 0, 0}); // all at start
@@ -30,7 +30,7 @@ TEST_CASE("All pieces move out of home") {
 }
 
 TEST_CASE("Pieces move according to dice value (same piece moves both dice)") {
-    MockDiceRoller mockDiceRoller;
+    auto mockDiceRoller = std::make_shared<MockDiceRoller>();
     PksGame game{mockDiceRoller};
 
     // The current player is not at Home
@@ -48,7 +48,7 @@ TEST_CASE("Pieces move according to dice value (same piece moves both dice)") {
     REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Yellow] == std::vector{0, 10, 20, 30});
 
     // Roll a dice and ensure the pieces move the desired amounts
-    mockDiceRoller.setNextRandomValues(6, 3);
+    mockDiceRoller->setNextRandomValues(6, 3);
     game.rollDice();
 
     gameSnapshot = game.getGameSnapshot();
@@ -65,7 +65,7 @@ TEST_CASE("Pieces move according to dice value (same piece moves both dice)") {
 }
 
 TEST_CASE("Pieces move according to dice value (different pieces move)") {
-    MockDiceRoller mockDiceRoller;
+    auto mockDiceRoller = std::make_shared<MockDiceRoller>();
     PksGame game{mockDiceRoller};
 
     // The current player is not at Home
@@ -83,7 +83,7 @@ TEST_CASE("Pieces move according to dice value (different pieces move)") {
     REQUIRE(game.getGameSnapshot().piecesByPlayer[PksColor::Yellow] == std::vector{0, 10, 20, 30});
 
     // Roll a dice and ensure the pieces move the desired amounts
-    mockDiceRoller.setNextRandomValues(6, 3);
+    mockDiceRoller->setNextRandomValues(6, 3);
     game.rollDice();
 
     gameSnapshot = game.getGameSnapshot();
@@ -100,7 +100,7 @@ TEST_CASE("Pieces move according to dice value (different pieces move)") {
 }
 
 TEST_CASE("Pieces move according to dice value (doubles test)") {
-    MockDiceRoller mockDiceRoller;
+    auto mockDiceRoller = std::make_shared<MockDiceRoller>();
     PksGame game{mockDiceRoller};
 
     // The current player is not at Home
@@ -118,7 +118,7 @@ TEST_CASE("Pieces move according to dice value (doubles test)") {
     REQUIRE(game.getGameSnapshot().piecesByPlayer[PksColor::Yellow] == std::vector{0, 10, 20, 30});
 
     // Roll a dice and ensure the pieces move the desired amounts
-    mockDiceRoller.setNextRandomValues(6, 6);
+    mockDiceRoller->setNextRandomValues(6, 6);
     game.rollDice();
     game.useDice(6, 0);
     gameSnapshot = game.useDice(6, 1);
@@ -128,7 +128,7 @@ TEST_CASE("Pieces move according to dice value (doubles test)") {
     REQUIRE(gameSnapshot.currentPlayer == PksColor::Yellow);
 
     // Roll another dice
-    mockDiceRoller.setNextRandomValues(5, 5);
+    mockDiceRoller->setNextRandomValues(5, 5);
     game.rollDice();
     game.useDice(5, 1);
     gameSnapshot = game.useDice(5, 2);
@@ -138,7 +138,7 @@ TEST_CASE("Pieces move according to dice value (doubles test)") {
     REQUIRE(gameSnapshot.currentPlayer == PksColor::Yellow);
 
     // Roll another dice
-    mockDiceRoller.setNextRandomValues(2, 1);
+    mockDiceRoller->setNextRandomValues(2, 1);
     game.rollDice();
     game.useDice(2, 1);
     gameSnapshot = game.useDice(1, 0);
@@ -149,7 +149,7 @@ TEST_CASE("Pieces move according to dice value (doubles test)") {
 }
 
 TEST_CASE("Pieces move according to dice value (all players move)") {
-    MockDiceRoller mockDiceRoller;
+    auto mockDiceRoller = std::make_shared<MockDiceRoller>();
     PksGame game{mockDiceRoller};
 
     // All pieces are at the start
@@ -161,35 +161,35 @@ TEST_CASE("Pieces move according to dice value (all players move)") {
     REQUIRE(gameSnapshot.currentPlayer == PksColor::Yellow);
 
     // Roll a dice and ensure the pieces move the desired amounts
-    mockDiceRoller.setNextRandomValues(1, 2);
+    mockDiceRoller->setNextRandomValues(1, 2);
     game.rollDice();
     game.useDice(1, 0);
     gameSnapshot = game.useDice(2, 1);
     REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Yellow] == std::vector{1, 2, 0, 0});
 
     // Next player rolls a dice
-    mockDiceRoller.setNextRandomValues(5, 3);
+    mockDiceRoller->setNextRandomValues(5, 3);
     game.rollDice();
     game.useDice(5, 1);
     gameSnapshot = game.useDice(3, 2);
     REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Red] == std::vector{0, 5, 3, 0});
 
     // Next player rolls a dice (doubles)
-    mockDiceRoller.setNextRandomValues(3, 3);
+    mockDiceRoller->setNextRandomValues(3, 3);
     game.rollDice();
     game.useDice(3, 0);
     gameSnapshot = game.useDice(3, 1);
     REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Green] == std::vector{3, 3, 0, 0});
 
     // Same player can roll again
-    mockDiceRoller.setNextRandomValues(2, 3);
+    mockDiceRoller->setNextRandomValues(2, 3);
     game.rollDice();
     game.useDice(2, 0);
     gameSnapshot=game.useDice(3, 1);
     REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Green] == std::vector{5, 6, 0, 0});
 
     // Last player rolls a dice
-    mockDiceRoller.setNextRandomValues(6, 3);
+    mockDiceRoller->setNextRandomValues(6, 3);
     game.rollDice();
     game.useDice(3, 3);
     gameSnapshot=game.useDice(6, 3);

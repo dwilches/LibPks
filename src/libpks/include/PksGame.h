@@ -29,7 +29,7 @@
  */
 class PksGame {
     PksGameBoard gameBoard;
-    PksDiceRoller &diceRoller;
+    std::shared_ptr<PksDiceRoller> diceRoller;
     PksGameState gameState = PksGameState::GameNotStarted;
     int numConsecutiveDiceRolls = 0;
 
@@ -43,8 +43,10 @@ class PksGame {
     std::unique_ptr<PksDiceResult> lastRollDiceResult = nullptr;
 
 public:
+    PksGame();
+
     // Used for testing. Allows mocking the Dice Roller to give the dice values the tests expect.
-    explicit PksGame(PksDiceRoller &);
+    explicit PksGame(const std::shared_ptr<PksDiceRoller> &);
 
     // Invoked to make an instance of PksGame ready for playing
     PksGameSnapshot start();

@@ -1,6 +1,7 @@
 #include <sstream>
 
 #include "PksGame.h"
+
 #include "PksConstants.h"
 #include "PksException.h"
 #include "PksGameState.h"
@@ -12,7 +13,15 @@ static const std::vector playerColors{
     PksColor::Yellow, PksColor::Red, PksColor::Green, PksColor::Blue,
 };
 
-PksGame::PksGame(PksDiceRoller &diceRoller) : gameBoard{playerColors}, diceRoller{diceRoller} {
+PksGame::PksGame()
+    : gameBoard{playerColors} {
+    this->diceRoller = std::make_shared<PksDiceRoller>();
+}
+
+// Used for testing. Allows mocking the Dice Roller to give the dice values the tests expect.
+PksGame::PksGame(const std::shared_ptr<PksDiceRoller> &diceRoller)
+    : gameBoard{playerColors},
+      diceRoller{diceRoller} {
 }
 
 PksGameSnapshot PksGame::start() {
@@ -46,10 +55,7 @@ PksDiceResult PksGame::rollDice() {
         };
     }
 
-    // Execute through a pointer for the polymorphic behaviour required by mocks in tests
-    const auto diceRoll = (&diceRoller)->rollNewPair();
-
-    lastRollDiceResult = std::make_unique<PksDiceResult>(diceRoll);
+    lastRollDiceResult = std::make_unique<PksDiceResult>(diceRoller->rollNewPair());
     numConsecutiveDiceRolls++;
     snitcher = nullptr; // The ability to snitch on a player ends the next time dice are rolled
 
@@ -87,7 +93,7 @@ PksDiceResult PksGame::rollDice() {
 
     // If the user has an option to use dice, then using them unwisely can get them snitched
     if (!lastRollDiceResult->allDiceUsed()) {
-        auto possibleSnitcher = std::make_unique<PksSnitcher>(gameBoard, *currentPlayer, diceRoll);
+        auto possibleSnitcher = std::make_unique<PksSnitcher>(gameBoard, *currentPlayer, lastRollDiceResult->getDice());
         // If there is no optimal move, snitch is not possible
         if (!possibleSnitcher->getOptimalMoves().empty()) {
             snitcher = std::move(possibleSnitcher);

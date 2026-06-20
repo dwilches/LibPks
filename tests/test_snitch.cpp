@@ -6,7 +6,7 @@
 #include "src/TestBoards.h"
 
 TEST_CASE("Can snitch if first dice wasted") {
-    MockDiceRoller mockDiceRoller;
+    auto mockDiceRoller = std::make_shared<MockDiceRoller>();
     PksGame game{mockDiceRoller};
 
     PksGameSnapshot initialBoard = {
@@ -20,7 +20,7 @@ TEST_CASE("Can snitch if first dice wasted") {
     };
     auto gameSnapshot = game.start(initialBoard);
 
-    mockDiceRoller.setNextRandomValues(2, 4);
+    mockDiceRoller->setNextRandomValues(2, 4);
     game.rollDice();
 
     // Ensure the optimal moves are as we expect
@@ -46,7 +46,7 @@ TEST_CASE("Can snitch if first dice wasted") {
 }
 
 TEST_CASE("Can snitch if second dice wasted") {
-    MockDiceRoller mockDiceRoller;
+    auto mockDiceRoller = std::make_shared<MockDiceRoller>();
     PksGame game{mockDiceRoller};
 
     PksGameSnapshot initialBoard = {
@@ -60,7 +60,7 @@ TEST_CASE("Can snitch if second dice wasted") {
     };
     auto gameSnapshot = game.start(initialBoard);
 
-    mockDiceRoller.setNextRandomValues(2, 4);
+    mockDiceRoller->setNextRandomValues(2, 4);
     game.rollDice();
 
     // Ensure the optimal moves are as we expect
@@ -85,7 +85,7 @@ TEST_CASE("Can snitch if second dice wasted") {
 }
 
 TEST_CASE("Can snitch if first dice wasted and both dice were required (2 pieces snitched)") {
-    MockDiceRoller mockDiceRoller;
+    auto mockDiceRoller = std::make_shared<MockDiceRoller>();
     PksGame game{mockDiceRoller};
 
     PksGameSnapshot initialBoard = {
@@ -99,7 +99,7 @@ TEST_CASE("Can snitch if first dice wasted and both dice were required (2 pieces
     };
     auto gameSnapshot = game.start(initialBoard);
 
-    mockDiceRoller.setNextRandomValues(1, 2);
+    mockDiceRoller->setNextRandomValues(1, 2);
     game.rollDice();
 
     // Ensure the optimal moves are as we expect
@@ -123,7 +123,7 @@ TEST_CASE("Can snitch if first dice wasted and both dice were required (2 pieces
 }
 
 TEST_CASE("Can snitch if first dice used ok but second dice wasted") {
-    MockDiceRoller mockDiceRoller;
+    auto mockDiceRoller = std::make_shared<MockDiceRoller>();
     PksGame game{mockDiceRoller};
 
     PksGameSnapshot initialBoard = {
@@ -138,7 +138,7 @@ TEST_CASE("Can snitch if first dice used ok but second dice wasted") {
     auto gameSnapshot = game.start(initialBoard);
 
     // Optimal play is: [{P0, D1}, {P0, D2}]
-    mockDiceRoller.setNextRandomValues(1, 2);
+    mockDiceRoller->setNextRandomValues(1, 2);
     game.rollDice();
 
     // Ensure the optimal moves are as we expect
@@ -168,7 +168,7 @@ TEST_CASE("Can snitch if first dice used ok but second dice wasted") {
 
 
 TEST_CASE("Can only snitch before next dice roll") {
-    MockDiceRoller mockDiceRoller;
+    auto mockDiceRoller = std::make_shared<MockDiceRoller>();
     PksGame game{mockDiceRoller};
 
     PksGameSnapshot initialBoard = {
@@ -182,7 +182,7 @@ TEST_CASE("Can only snitch before next dice roll") {
         };
     auto gameSnapshot = game.start(initialBoard);
 
-    mockDiceRoller.setNextRandomValues(2, 4);
+    mockDiceRoller->setNextRandomValues(2, 4);
     game.rollDice();
 
     // Ensure the optimal moves are as we expect
@@ -201,7 +201,7 @@ TEST_CASE("Can only snitch before next dice roll") {
     REQUIRE(gameSnapshot.currentPlayer == PksColor::Green); // next player can roll
 
     // Nobody noticed, and the next player rolls
-    mockDiceRoller.setNextRandomValues(1, 1);
+    mockDiceRoller->setNextRandomValues(1, 1);
     game.rollDice();
 
     gameSnapshot = game.getGameSnapshot();

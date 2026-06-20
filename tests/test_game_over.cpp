@@ -7,7 +7,7 @@
 #include "src/TestBoards.h"
 
 TEST_CASE("A piece can reach the final stair") {
-    MockDiceRoller mockDiceRoller;
+    auto mockDiceRoller = std::make_shared<MockDiceRoller>();
     PksGame game{mockDiceRoller};
 
     PksGameSnapshot initialBoard = {
@@ -23,7 +23,7 @@ TEST_CASE("A piece can reach the final stair") {
     REQUIRE(gameSnapshot.currentPlayer == PksColor::Yellow);
 
     // Roll a dice and go on the final stair
-    mockDiceRoller.setNextRandomValues(6, 6);
+    mockDiceRoller->setNextRandomValues(6, 6);
     game.rollDice();
 
     gameSnapshot = game.useDice(6, 0);
@@ -38,7 +38,7 @@ TEST_CASE("A piece can reach the final stair") {
 }
 
 TEST_CASE("A piece cannot move after reaching the final target") {
-    MockDiceRoller mockDiceRoller;
+    auto mockDiceRoller = std::make_shared<MockDiceRoller>();
     PksGame game{mockDiceRoller};
 
     PksGameSnapshot initialBoard = {
@@ -54,7 +54,7 @@ TEST_CASE("A piece cannot move after reaching the final target") {
     REQUIRE(gameSnapshot.currentPlayer == PksColor::Yellow);
 
     // Roll a dice and go on the final stair
-    mockDiceRoller.setNextRandomValues(5, 2);
+    mockDiceRoller->setNextRandomValues(5, 2);
     game.rollDice();
 
     gameSnapshot = game.useDice(2, 0);
@@ -72,7 +72,7 @@ TEST_CASE("A piece cannot move after reaching the final target") {
 }
 
 TEST_CASE("Game ends after all pieces reach the final spot") {
-    MockDiceRoller mockDiceRoller;
+    auto mockDiceRoller = std::make_shared<MockDiceRoller>();
     PksGame game{mockDiceRoller};
 
     PksGameSnapshot initialBoard = {
@@ -88,7 +88,7 @@ TEST_CASE("Game ends after all pieces reach the final spot") {
     REQUIRE(gameSnapshot.currentPlayer == PksColor::Yellow);
 
     // Roll a dice and go on the final stair
-    mockDiceRoller.setNextRandomValues(3, 4);
+    mockDiceRoller->setNextRandomValues(3, 4);
     game.rollDice();
     gameSnapshot = game.useDice(3, 0);
 

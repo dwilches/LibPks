@@ -13,8 +13,8 @@ int main() {
     std::cout << " */" << std::endl << std::endl;
 
     PksDiceRoller roller;
-    PksGame game{roller};
-    const PksGameSnapshot gameState = game.start();
+    PksGame game;
+    auto gameState = game.start();
     std::cout << "CurrentPlayer is " << gameState.currentPlayer << std::endl;
 
     std::cout << "This player's pieces are all at home (-1 is Home): " << std::endl;
@@ -31,6 +31,7 @@ int main() {
     }
 
     std::cout << "New piece positions: " << std::endl;
+    gameState = game.getGameSnapshot();
     printPositions(gameState.piecesByPlayer.at(gameState.currentPlayer));
 }
 

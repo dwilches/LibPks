@@ -7,7 +7,7 @@
 #include "src/TestBoards.h"
 
 TEST_CASE("A piece captures another one") {
-    MockDiceRoller mockDiceRoller;
+    auto mockDiceRoller = std::make_shared<MockDiceRoller>();
     PksGame game{mockDiceRoller};
 
     PksGameSnapshot initialBoard = {
@@ -23,7 +23,7 @@ TEST_CASE("A piece captures another one") {
     REQUIRE(gameSnapshot.currentPlayer == PksColor::Red);
 
     // Roll a dice and capture a piece
-    mockDiceRoller.setNextRandomValues(1, 2);
+    mockDiceRoller->setNextRandomValues(1, 2);
     game.rollDice();
     gameSnapshot = game.useDice(1, 0);
 
@@ -51,7 +51,7 @@ TEST_CASE("A piece captures another one") {
 }
 
 TEST_CASE("A piece captures multiple pieces of the same color") {
-    MockDiceRoller mockDiceRoller;
+    auto mockDiceRoller = std::make_shared<MockDiceRoller>();
     PksGame game{mockDiceRoller};
 
     PksGameSnapshot initialBoard = {
@@ -67,7 +67,7 @@ TEST_CASE("A piece captures multiple pieces of the same color") {
     REQUIRE(gameSnapshot.currentPlayer == PksColor::Red);
 
     // Roll a dice and capture a piece
-    mockDiceRoller.setNextRandomValues(1, 2);
+    mockDiceRoller->setNextRandomValues(1, 2);
     game.rollDice();
     gameSnapshot = game.useDice(1, 0);
 
@@ -80,7 +80,7 @@ TEST_CASE("A piece captures multiple pieces of the same color") {
 }
 
 TEST_CASE("A piece captures multiple pieces of different colors") {
-    MockDiceRoller mockDiceRoller;
+    auto mockDiceRoller = std::make_shared<MockDiceRoller>();
     PksGame game{mockDiceRoller};
 
     PksGameSnapshot initialBoard = {
@@ -96,7 +96,7 @@ TEST_CASE("A piece captures multiple pieces of different colors") {
     REQUIRE(gameSnapshot.currentPlayer == PksColor::Red);
 
     // Roll a dice and capture a piece
-    mockDiceRoller.setNextRandomValues(1, 2);
+    mockDiceRoller->setNextRandomValues(1, 2);
     game.rollDice();
     gameSnapshot = game.useDice(1, 0);
 
@@ -109,7 +109,7 @@ TEST_CASE("A piece captures multiple pieces of different colors") {
 }
 
 TEST_CASE("Cannot capture pieces in safe spots") {
-    MockDiceRoller mockDiceRoller;
+    auto mockDiceRoller = std::make_shared<MockDiceRoller>();
     PksGame game{mockDiceRoller};
 
     PksGameSnapshot initialBoard = {
@@ -125,7 +125,7 @@ TEST_CASE("Cannot capture pieces in safe spots") {
     REQUIRE(gameSnapshot.currentPlayer == PksColor::Yellow);
 
     // Roll a dice and reach the same spot where another player has a piece
-    mockDiceRoller.setNextRandomValues(1, 2);
+    mockDiceRoller->setNextRandomValues(1, 2);
     game.rollDice();
     gameSnapshot = game.useDice(1, 0);
 
@@ -139,7 +139,7 @@ TEST_CASE("Cannot capture pieces in safe spots") {
 }
 
 TEST_CASE("When going out of Home, capture foreign pieces currently at our Home") {
-    MockDiceRoller mockDiceRoller;
+    auto mockDiceRoller = std::make_shared<MockDiceRoller>();
     PksGame game{mockDiceRoller};
 
     PksGameSnapshot initialBoard = {
@@ -155,7 +155,7 @@ TEST_CASE("When going out of Home, capture foreign pieces currently at our Home"
     REQUIRE(gameSnapshot.currentPlayer == PksColor::Yellow);
 
     // Roll doubles to get out of home
-    mockDiceRoller.setNextRandomValues(2, 2);
+    mockDiceRoller->setNextRandomValues(2, 2);
     game.rollDice();
 
     // All pieces at our home should have been captured
