@@ -4,7 +4,7 @@
 #include "PksConstants.h"
 #include "PksException.h"
 
-int PksUtils::convertSpotNumber(const PksColor &from, const PksColor &to, const int spot) {
+int PksUtils::convertSpotNumber(const PksColor from, const PksColor to, const int spot) {
     //region Validations
     if (spot < 0 || spot > LAST_SHARED_SPOT) {
         throw PksException{
@@ -30,7 +30,7 @@ int PksUtils::convertSpotNumber(const PksColor &from, const PksColor &to, const 
     return (spot + (playerDistance * 17)) % TOTAL_SHARED_SPOTS;
 }
 
-PksSpotType PksUtils::getSpotType(const int spot) {
+PksSpotType PksUtils::getSpotType(const PksSpotIdx spot) {
     // Initial spot, treated as both Home and Jail
     if (spot == HOME_SPOT) { return PksSpotType::Home; }
 
@@ -52,10 +52,4 @@ PksSpotType PksUtils::getSpotType(const int spot) {
     }
 
     return PksSpotType::UnsafeShared;
-}
-
-bool PksUtils::isValidAndUnsafeShared(const int possibleSpot) {
-    return possibleSpot >= START_SPOT &&
-           possibleSpot <= LAST_SHARED_SPOT &&
-           getSpotType(possibleSpot) == PksSpotType::UnsafeShared;
 }

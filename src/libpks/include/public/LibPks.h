@@ -13,6 +13,8 @@
 #include <set>
 #include <vector>
 
+#include "PksTypeDefs.h"
+
 enum class PksColor: int {
     Yellow, Red, Green, Blue
 };
@@ -25,13 +27,13 @@ struct PksGameSnapshot;
 class PksDiceResult;
 
 // Identifies each of the pieces of a player. Can contain numbers between 0 and 3 (NUM_PIECES - 1)
-typedef int PIECE_IDX;
+typedef int PksPieceIdx;
 
 // Value returned by a dice. Can contain values 1 to 6.
-typedef int DICE_VAL;
+typedef int PksDiceVal;
 
-typedef std::pair<DICE_VAL, DICE_VAL> PksDicePair;
-typedef std::map<PksColor, std::vector<int> > PksPiecesByPlayer;
+typedef std::pair<PksDiceVal, PksDiceVal> PksDicePair;
+typedef std::map<PksColor, std::vector<PksSpotIdx> > PksPiecesByPlayer;
 
 class PksGame {
 public:
@@ -44,12 +46,12 @@ public:
     PksDiceResult rollDice();
 
     // Moves a piece of the current player a certain number of spots
-    PksGameSnapshot useDice(int diceValue, int numPiece);
+    PksGameSnapshot useDice(PksDiceVal, PksPieceIdx);
 
     // Capturing a piece is mandatory: when a player misses the opportunity to capture a piece, then their own piece
     // is punished by sending it home (but only if another player catches the mistake).
     // Returns `true` if the snitch was valid.
-    bool snitchOnPlayer(const PksColor &snitched, const std::set<PIECE_IDX> &pieces);
+    bool snitchOnPlayer(const PksColor &snitched, const std::set<PksPieceIdx> &pieces);
 
     // Returns the current location of every piece of the game, as well as whether the game has finished and who the
     // current player is.
@@ -60,7 +62,7 @@ struct PksGameSnapshot {
     PksPiecesByPlayer piecesByPlayer;
     PksColor currentPlayer;
     PksGameState gameState;
-    std::set<PIECE_IDX> snitchablePieces;
+    std::set<PksPieceIdx> snitchablePieces;
 };
 
 class PksDiceResult {

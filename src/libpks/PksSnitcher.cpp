@@ -27,12 +27,12 @@ PksColor PksSnitcher::getSnitchablePlayer() const {
     return currentPlayer;
 }
 
-std::set<PIECE_IDX> PksSnitcher::getSnitchablePieces() const {
+std::set<PksPieceIdx> PksSnitcher::getSnitchablePieces() const {
     if (!playerCanBeSnitchedNow) {
         return {};
     }
 
-    std::set<PIECE_IDX> snitchedPieces;
+    std::set<PksPieceIdx> snitchedPieces;
     for (const auto &moves: optimalMoves) {
         for (const auto &move: moves) {
             snitchedPieces.insert(move.pieceIdx);
@@ -74,7 +74,7 @@ PksDMoveSet PksSnitcher::getOptimalCapturingMoves(const PksDMoveSet &capturingMo
     return possibleOptimalMoves;
 }
 
-void PksSnitcher::reportDiceUsed(const DICE_VAL diceValue, const PIECE_IDX pieceIdx) {
+void PksSnitcher::reportDiceUsed(const PksDiceVal diceValue, const PksPieceIdx pieceIdx) {
     actualMoves.emplace_back(pieceIdx, diceValue);
 
     // If the player has already used the 2 dice in this turn, then the complete move should be contained in
@@ -106,7 +106,7 @@ void PksSnitcher::reportDiceUsed(const DICE_VAL diceValue, const PIECE_IDX piece
 }
 
 bool PksSnitcher::isSnitchValid(const PksColor &snitchedPlayer,
-                                const std::set<PIECE_IDX> &snitchedPieces) const {
+                                const std::set<PksPieceIdx> &snitchedPieces) const {
     return playerCanBeSnitchedNow &&
            snitchedPlayer == currentPlayer &&
            std::ranges::includes(getSnitchablePieces(), snitchedPieces);
@@ -127,8 +127,8 @@ PksSnitcher::getCapturingMoves(const PksGameBoard &gameBoard,
 PksDMoveSet
 PksSnitcher::getCapturingMoves(const PksGameBoard &gameBoard,
                                const PksColor currentPlayer,
-                               const DICE_VAL firstDice,
-                               const DICE_VAL secondDice) {
+                               const PksDiceVal firstDice,
+                               const PksDiceVal secondDice) {
     PksDMoveSet capturingMoves;
 
     // Simulate moving the first dice first
@@ -176,7 +176,7 @@ PksSnitcher::getCapturingMoves(const PksGameBoard &gameBoard,
 std::vector<std::pair<PksSMove, PksGameBoard> >
 PksSnitcher::getPossibleMoves(const PksGameBoard &gameBoard,
                               const PksColor &currentPlayer,
-                              const DICE_VAL &diceValue) {
+                              const PksDiceVal &diceValue) {
     const auto thisPlayerPieces = gameBoard.getPieces().at(currentPlayer);
 
     std::vector<std::pair<PksSMove, PksGameBoard> > possibleMoves;

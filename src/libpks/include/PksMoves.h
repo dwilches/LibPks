@@ -9,8 +9,8 @@
 
 // A single piece that is moved by a dice value, and how many foreign pieces it captured.
 struct PksSMove {
-    PIECE_IDX pieceIdx;
-    DICE_VAL diceValue;
+    PksPieceIdx pieceIdx;
+    PksDiceVal diceValue;
     int numCaptured;
 
     // Allows this struct to be used with sets

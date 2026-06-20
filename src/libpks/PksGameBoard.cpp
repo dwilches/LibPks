@@ -6,6 +6,7 @@
 #include "PksConstants.h"
 #include "PksException.h"
 #include "PksUtils.h"
+#include "PksTypeDefs.h"
 
 PksGameBoard::PksGameBoard(const std::vector<PksColor> &playerColors) {
     for (const auto color: playerColors) {
@@ -21,7 +22,7 @@ PksPiecesByPlayer PksGameBoard::getPieces() const {
     return boardPieces;
 }
 
-SPOT_IDX PksGameBoard::getSpotForPiece(const PksColor color, const PIECE_IDX pieceIdx) const {
+PksSpotIdx PksGameBoard::getSpotForPiece(const PksColor color, const PksPieceIdx pieceIdx) const {
     return boardPieces.at(color)[pieceIdx];
 }
 
@@ -31,19 +32,19 @@ void PksGameBoard::setPieces(const PksPiecesByPlayer &sourcePieces) {
     }
 }
 
-bool PksGameBoard::anyPieceAtSpot(const PksColor color, const SPOT_IDX spotIdx) const {
+bool PksGameBoard::anyPieceAtSpot(const PksColor color, const PksSpotIdx spotIdx) const {
     return std::ranges::any_of(boardPieces.at(color),
-                               [spotIdx](const int piece) { return piece == spotIdx; });
+                               [spotIdx](const PksSpotIdx spot) { return spot == spotIdx; });
 }
 
 bool PksGameBoard::allPiecesAtTarget(const PksColor color) const {
     return std::ranges::all_of(boardPieces.at(color),
-                               [](const int piece) { return piece == FINAL_TARGET_SPOT; });
+                               [](const PksSpotIdx spot) { return spot == FINAL_TARGET_SPOT; });
 }
 
 bool PksGameBoard::allPlayingPiecesAtHome(const PksColor color) const {
     return std::ranges::all_of(boardPieces.at(color),
-                               [](const int piece) { return piece == HOME_SPOT || piece == FINAL_TARGET_SPOT; });
+                               [](const PksSpotIdx spot) { return spot == HOME_SPOT || spot == FINAL_TARGET_SPOT; });
 }
 
 void PksGameBoard::moveAllPiecesOutOfHome(const PksColor color) {
@@ -73,7 +74,7 @@ void PksGameBoard::moveAllPlayingPiecesHome(const PksColor color) {
     }
 }
 
-int PksGameBoard::movePiece(const PksColor color, const PIECE_IDX pieceIdx, const int numSpots) {
+int PksGameBoard::movePiece(const PksColor color, const PksPieceIdx pieceIdx, const int numSpots) {
     auto &pieces = boardPieces.at(color);
 
     // Move the player's piece to the target spot
@@ -99,7 +100,7 @@ int PksGameBoard::movePiece(const PksColor color, const PIECE_IDX pieceIdx, cons
     return numCaptured;
 }
 
-void PksGameBoard::movePiecesHome(const PksColor color, const std::set<PIECE_IDX> &targetPiecesIdx) {
+void PksGameBoard::movePiecesHome(const PksColor color, const std::set<PksPieceIdx> &targetPiecesIdx) {
     auto &pieces = boardPieces.at(color);
     for (const auto &pieceIdx: targetPiecesIdx) {
         if (pieces[pieceIdx] == FINAL_TARGET_SPOT) {
@@ -111,7 +112,7 @@ void PksGameBoard::movePiecesHome(const PksColor color, const std::set<PIECE_IDX
     }
 }
 
-int PksGameBoard::movePiecesHomeIfAtSpot(const PksColor color, const SPOT_IDX spotIdx) {
+int PksGameBoard::movePiecesHomeIfAtSpot(const PksColor color, const PksSpotIdx spotIdx) {
     int numCaptured = 0;
     for (auto &piece: boardPieces.at(color)) {
         if (piece == spotIdx) {

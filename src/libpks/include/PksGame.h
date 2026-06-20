@@ -42,39 +42,40 @@ class PksGame {
     // Keeps track of the last dice values and whether they have already been used
     std::unique_ptr<PksDiceResult> lastRollDiceResult = nullptr;
 
-    // Validates the current game state before invoking a method taht has prerrequisites.
-    void validateGameInCourse(const std::string &methodName) const;
-
-    // Returns true if any piece was captured.
-    bool moveCurrentPlayerPiece(PIECE_IDX pieceIdx, int numSpots);
-
-    // Ends a player's turn and starts the next one
-    void nextPlayer();
-
 public:
     // Used for testing. Allows mocking the Dice Roller to give the dice values the tests expect.
-    explicit PksGame(PksDiceRoller &diceRoller);
+    explicit PksGame(PksDiceRoller &);
 
     // Invoked to make an instance of PksGame ready for playing
     PksGameSnapshot start();
 
     // Useful for tests
-    PksGameSnapshot start(const PksGameSnapshot &gameSnapshot);
+    PksGameSnapshot start(const PksGameSnapshot &);
 
     // Invoked to roll 2 random dice
     PksDiceResult rollDice();
 
     // Moves a piece of the current player a certain number of spots
-    PksGameSnapshot useDice(int diceValue, int numPiece);
+    PksGameSnapshot useDice(PksDiceVal, PksPieceIdx);
 
     // Capturing a piece is mandatory: when a player misses the opportunity to capture a piece, then their own piece
     // is punished by sending it home (but only if another player catches the mistake).
     // Returns `true` if the snitch was valid.
-    bool snitchOnPlayer(const PksColor &snitched, const std::set<PIECE_IDX> &pieces);
+    bool snitchOnPlayer(const PksColor &snitched, const std::set<PksPieceIdx> &pieces);
 
     // Returns the current location of every piece of the game, as well as whether the game has finished and who the
     // current player is.
     [[nodiscard]] PksGameSnapshot getGameSnapshot() const;
+
+private:
+    // Validates the current game state before invoking a method that has prerequisites.
+    void validateGameInCourse(const std::string &methodName) const;
+
+    // Returns true if any piece was captured.
+    bool moveCurrentPlayerPiece(PksPieceIdx pieceIdx, int numSpots);
+
+    // Ends a player's turn and starts the next one
+    void nextPlayer();
 };
 
 #endif // PKSLIB_LIBRARY_H

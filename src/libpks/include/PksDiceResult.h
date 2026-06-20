@@ -1,7 +1,6 @@
 #ifndef LIBPKS_PKSDICERESULT_H
 #define LIBPKS_PKSDICERESULT_H
 
-#include "PksException.h"
 #include "PksTypeDefs.h"
 
 /**
@@ -30,7 +29,7 @@ public:
     void setDiceCannotBeUsed();
 
     // Marks a single dice as used (e.g. when a player uses a dice's value to move a piece(.)
-    void markDiceAsUsed(int diceValue);
+    void markDiceAsUsed(PksDiceVal);
 };
 
 #endif //LIBPKS_PKSDICERESULT_H

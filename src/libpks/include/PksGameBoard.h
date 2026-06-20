@@ -22,13 +22,13 @@ public:
     // Returns a copy of the location of every piece of every player
     [[nodiscard]] PksPiecesByPlayer getPieces() const;
 
-    [[nodiscard]] SPOT_IDX getSpotForPiece(PksColor, PIECE_IDX) const;
+    [[nodiscard]] PksSpotIdx getSpotForPiece(PksColor, PksPieceIdx) const;
 
     // Allows setting arbitrary locations for every piece of every player.
     // Mostly useful for tests.
     void setPieces(const PksPiecesByPlayer &);
 
-    [[nodiscard]] bool anyPieceAtSpot(PksColor, SPOT_IDX) const;
+    [[nodiscard]] bool anyPieceAtSpot(PksColor, PksSpotIdx) const;
 
     [[nodiscard]] bool allPiecesAtTarget(PksColor) const;
 
@@ -43,15 +43,15 @@ public:
     // Moves a piece a number of spots. It validates the piece is not at home/target as those pieces can't be moved.
     // Foreign pieces in the target spot are captured.
     // Returns the number of captured pieces.
-    int movePiece(PksColor, PIECE_IDX, int numSpots);
+    int movePiece(PksColor, PksPieceIdx, int numSpots);
 
     // Moves a group of pieces back home. It validates the pieces are in play.
-    void movePiecesHome(PksColor, const std::set<PIECE_IDX> &);
+    void movePiecesHome(PksColor, const std::set<PksPieceIdx> &);
 
 private:
     // Invoked when a player falls in this spot, so all pieces of other players at that spot need to go home.
     // Returns the number of pieces captured.
-    int movePiecesHomeIfAtSpot(PksColor, SPOT_IDX);
+    int movePiecesHomeIfAtSpot(PksColor, PksSpotIdx);
 };
 
 #endif //LIBPKS_PKSGAMEBOARD_H

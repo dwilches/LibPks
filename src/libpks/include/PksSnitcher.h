@@ -25,16 +25,16 @@ class PksSnitcher {
 public:
     // Constructs an object with all the information of which pieces could be snitched if dice are not played in a
     // certain order or to capture a certain piece.
-    PksSnitcher(const PksGameBoard &gameBoard,
+    PksSnitcher(const PksGameBoard &,
                 PksColor currentPlayer,
-                const PksDicePair &dicePair);
+                const PksDicePair &);
 
     [[nodiscard]] PksColor getSnitchablePlayer() const;
 
     // When a player wastes a dice, this method returns the pieces were the dice could have been used to reach the
     // max number of captures. All pieces that didn't fulfill their part in the optimal captures become snitchable.
     // Special care is put for mutually exclusive optimal plays.
-    [[nodiscard]] std::set<PIECE_IDX> getSnitchablePieces() const;
+    [[nodiscard]] std::set<PksPieceIdx> getSnitchablePieces() const;
 
     // Get the list of possible optimal plays. There may be several optimal alternatives (i.e. sequence of movements
     // that yield the maximum number of captures).
@@ -42,34 +42,34 @@ public:
 
     // When the current player makes a move, we need to report it to this class so we can recalculate the snitchable
     // pieces (in case the movement is not part of any optimal play).
-    void reportDiceUsed(DICE_VAL, PIECE_IDX);
+    void reportDiceUsed(PksDiceVal, PksPieceIdx);
 
     // When a player snitches on another, we need to validate the snitch is valid before capturing the pieces.
     [[nodiscard]] bool isSnitchValid(const PksColor &snitchedPlayer,
-                                     const std::set<PIECE_IDX> &snitchedPieces) const;
+                                     const std::set<PksPieceIdx> &snitchedPieces) const;
 
     //region Other methods that should be private but are exposed for tests
 
     [[nodiscard]] static PksDMoveSet
-    getCapturingMoves(const PksGameBoard &gameBoard,
+    getCapturingMoves(const PksGameBoard &,
                       const PksColor &currentPlayer,
-                      const PksDicePair &dicePair);
-
-    [[nodiscard]] static PksDMoveSet
-    getCapturingMoves(const PksGameBoard &gameBoard,
-                      PksColor currentPlayer,
-                      DICE_VAL firstDice,
-                      DICE_VAL secondDice);
+                      const PksDicePair &);
 
     [[nodiscard]] static std::vector<std::pair<PksSMove, PksGameBoard> >
-    getPossibleMoves(const PksGameBoard &gameBoard,
+    getPossibleMoves(const PksGameBoard &,
                      const PksColor &currentPlayer,
-                     const DICE_VAL &diceValue);
+                     const PksDiceVal &);
 
     //endregion
 
 private:
     static PksDMoveSet getOptimalCapturingMoves(const PksDMoveSet &capturingMoves);
+
+    [[nodiscard]] static PksDMoveSet
+    getCapturingMoves(const PksGameBoard &,
+                      PksColor currentPlayer,
+                      PksDiceVal firstDice,
+                      PksDiceVal secondDice);
 };
 
 #endif //LIBPKS_PKSSNITCHABLEPIECES_H

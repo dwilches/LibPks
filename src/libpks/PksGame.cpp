@@ -104,19 +104,19 @@ void PksGame::nextPlayer() {
     numConsecutiveDiceRolls = 0;
 }
 
-PksGameSnapshot PksGame::useDice(const int diceValue, const int numPiece) {
+PksGameSnapshot PksGame::useDice(const PksDiceVal diceValue, const PksPieceIdx pieceIdx) {
     validateGameInCourse("PksGame::useDice()");
 
-    if (numPiece < 0 || numPiece >= NUM_PIECES) {
+    if (pieceIdx < 0 || pieceIdx >= NUM_PIECES) {
         throw PksException{
-            "PksGame::useDice(): Attempted to move invalid piece: " + std::to_string(numPiece)
+            "PksGame::useDice(): Attempted to move invalid piece: " + std::to_string(pieceIdx)
         };
     }
 
-    moveCurrentPlayerPiece(numPiece, diceValue);
+    moveCurrentPlayerPiece(pieceIdx, diceValue);
     lastRollDiceResult->markDiceAsUsed(diceValue);
     if (snitcher) {
-        snitcher->reportDiceUsed(diceValue, numPiece);
+        snitcher->reportDiceUsed(diceValue, pieceIdx);
     }
 
     const bool canRollAgain = lastRollDiceResult->isDoubles() && numConsecutiveDiceRolls != MAX_DICE_ROLLS;
@@ -128,7 +128,7 @@ PksGameSnapshot PksGame::useDice(const int diceValue, const int numPiece) {
 }
 
 // Returns true if the snitch was successful
-bool PksGame::snitchOnPlayer(const PksColor &snitched, const std::set<PIECE_IDX> &pieces) {
+bool PksGame::snitchOnPlayer(const PksColor &snitched, const std::set<PksPieceIdx> &pieces) {
     validateGameInCourse("PksGame::snitchOnPlayer()");
 
     if (!snitcher || !snitcher->isSnitchValid(snitched, pieces)) {
@@ -146,18 +146,18 @@ PksGameSnapshot PksGame::getGameSnapshot() const {
         .piecesByPlayer = gameBoard.getPieces(),
         .currentPlayer = *currentPlayer,
         .gameState = gameState,
-        .snitchablePieces = snitcher ? snitcher->getSnitchablePieces() : std::set<PIECE_IDX>{},
+        .snitchablePieces = snitcher ? snitcher->getSnitchablePieces() : std::set<PksPieceIdx>{},
         .optimalMoves = snitcher ? snitcher->getOptimalMoves() : PksDMoveSet{},
     };
 }
 
 // Returns true if any piece was captured
-bool PksGame::moveCurrentPlayerPiece(const PIECE_IDX pieceIdx, const int numSpots) {
+bool PksGame::moveCurrentPlayerPiece(const PksPieceIdx pieceIdx, const int numSpots) {
     const int currentSpotIdx = gameBoard.getSpotForPiece(*currentPlayer, pieceIdx);
     if (currentSpotIdx == FINAL_TARGET_SPOT || currentSpotIdx == HOME_SPOT) {
         throw PksException{
             "PksGame::moveCurrentPlayerPiece(): Attempted to move a piece that is out of play: " +
-                std::to_string(pieceIdx)
+            std::to_string(pieceIdx)
         };
     }
     const int numCaptured = gameBoard.movePiece(*currentPlayer, pieceIdx, numSpots);

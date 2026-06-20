@@ -10,7 +10,7 @@ class MockDiceRoller : public PksDiceRoller {
     std::deque<int> randomSource;
 
 public:
-    void setNextRandomValues(int diceValue1, int diceValue2) {
+    void setNextRandomValues(const PksDiceVal diceValue1, const PksDiceVal diceValue2) {
         randomSource.push_back(diceValue1);
         randomSource.push_back(diceValue2);
     }

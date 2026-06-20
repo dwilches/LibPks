@@ -1,5 +1,7 @@
 #include "PksDiceResult.h"
 
+#include "PksException.h"
+
 PksDiceResult::PksDiceResult(const PksDicePair &dicePair)
     : dicePair{dicePair} {
 }
@@ -20,7 +22,7 @@ void PksDiceResult::setDiceCannotBeUsed() {
     isDiceUsed = {true, true};
 }
 
-void PksDiceResult::markDiceAsUsed(const int diceValue) {
+void PksDiceResult::markDiceAsUsed(const PksDiceVal diceValue) {
     if (dicePair.first != diceValue && dicePair.second != diceValue) {
         throw PksException{
             "There is no dice with value " + std::to_string(diceValue) + " in this roll."

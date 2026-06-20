@@ -11,7 +11,7 @@ typedef std::set<PksSMove> PksSMoveSet;
 
 PksSMoveSet getPossibleMoves(const PksGameBoard &board,
                              const PksColor currentPlayer,
-                             const DICE_VAL diceValue) {
+                             const PksDiceVal diceValue) {
     auto movesWithBoards = PksSnitcher::getPossibleMoves(board, currentPlayer, diceValue);
     PksSMoveSet moves;
     for (auto &move: movesWithBoards | std::views::keys) {
