@@ -8,24 +8,26 @@
 #include "include/PksGameBoard.h"
 #include "PksUtils.h"
 
-PksSnitcher::PksSnitcher(const PksPiecesByPlayer &piecesByPlayer,
+PksSnitcher::PksSnitcher(const PksGameBoard &gameBoard,
                          const PksColor currentPlayer,
                          const PksDicePair &dicePair)
-    : piecesByPlayer{piecesByPlayer},
-      currentPlayer{currentPlayer},
+    : currentPlayer{currentPlayer},
       dicePair{dicePair},
       playerCanBeSnitchedNow{false} {
     // Gets every possible move where at least 1 capture is made
-    auto capturingMoves = getCapturingMoves(piecesByPlayer, currentPlayer, dicePair);
-    if (capturingMoves.empty()) {
-        maxBothDiceCanCapture = 0;
-        return;
+    auto capturingMoves = getCapturingMoves(gameBoard.getPieces(), currentPlayer, dicePair);
+    if (!capturingMoves.empty()) {
+        // Retain only the best moves
+        optimalMoves = getOptimalCapturingMoves(capturingMoves);
     }
+}
+
+PksDMoveSet PksSnitcher::getOptimalCapturingMoves(const PksDMoveSet& capturingMoves) {
+    PksDMoveSet possibleOptimalMoves;
+    int maxTotalCaptured = 0;
 
     // Find the maximum number of pieces that can be captured, all sequences that can capture that many pieces are the
     // optimal plays.
-    PksDMoveSet possibleOptimalMoves;
-    int maxTotalCaptured = 0;
     for (const auto &sequence: capturingMoves) {
         int totalCaptured = 0;
         for (const auto &move: sequence) {
@@ -45,10 +47,9 @@ PksSnitcher::PksSnitcher(const PksPiecesByPlayer &piecesByPlayer,
             possibleOptimalMoves.insert(sequence);
         }
     }
-    optimalMoves = std::move(possibleOptimalMoves);
-    maxBothDiceCanCapture = maxTotalCaptured;
-}
 
+    return possibleOptimalMoves;
+}
 
 // Returns possible moves where at least one piece is captured
 PksDMoveSet
@@ -143,10 +144,6 @@ PksSnitcher::getPossibleMoves(const PksPiecesByPlayer &piecesByPlayer,
 
 PksColor PksSnitcher::getSnitchablePlayer() const {
     return currentPlayer;
-}
-
-int PksSnitcher::getMaxCanBeCaptured() const {
-    return maxBothDiceCanCapture;
 }
 
 PksDMoveSet PksSnitcher::getOptimalMoves() const {

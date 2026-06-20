@@ -89,10 +89,7 @@ PksDiceResult PksGame::rollDice() {
 
     // If the user has an option to use dice, then using them unwisely can get them snitched
     if (!lastRollDiceResult->allDiceUsed()) {
-        const auto &gameSnapshot = getGameSnapshot();
-        snitchablePieces = std::make_unique<PksSnitcher>(gameSnapshot.piecesByPlayer,
-                                                         *currentPlayer,
-                                                         diceRoll);
+        snitchablePieces = std::make_unique<PksSnitcher>(gameBoard, *currentPlayer, diceRoll);
     }
 
     // Return a copy of the dice result (we don't want the user to tamper with our library's internals)

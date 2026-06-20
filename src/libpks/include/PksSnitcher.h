@@ -4,20 +4,15 @@
 #include <set>
 #include <memory>
 
-#include "PksGameSnapshot.h"
+#include "PksGameBoard.h"
 #include "PksMoves.h"
 #include "PksTypeDefs.h"
 
 class PksSnitcher {
-    // State of the game when the dice were rolled.
-    const PksPiecesByPlayer piecesByPlayer;
     const PksColor currentPlayer;
     const PksDicePair dicePair;
 
     bool playerCanBeSnitchedNow;
-
-    // If both dice were used optimally, the player could capture this many pieces
-    int maxBothDiceCanCapture;
 
     // There can be multiple optimal plays in a turn. An optimal play is a sequence of movements with the current
     // dice that captures the maximum number of pieces.
@@ -30,9 +25,11 @@ class PksSnitcher {
 public:
     // Constructs an object with all the information of which pieces could be snitched if dice are not played in a
     // certain order or to capture a certain piece.
-    PksSnitcher(const PksPiecesByPlayer &piecesByPlayer,
+    PksSnitcher(const PksGameBoard &gameBoard,
                 PksColor currentPlayer,
                 const PksDicePair &dicePair);
+
+    static PksDMoveSet getOptimalCapturingMoves(const PksDMoveSet& capturingMoves);
 
     [[nodiscard]] static PksDMoveSet
     getCapturingMoves(const PksPiecesByPlayer &piecesByPlayer,
