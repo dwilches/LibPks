@@ -22,6 +22,24 @@ PksSnitcher::PksSnitcher(const PksGameBoard &gameBoard,
     }
 }
 
+PksColor PksSnitcher::getSnitchablePlayer() const {
+    return currentPlayer;
+}
+
+std::set<PIECE_IDX> PksSnitcher::getSnitchablePieces() const {
+    std::set<PIECE_IDX> snitchedPieces;
+    for (const auto &moves: optimalMoves) {
+        for (const auto &move: moves) {
+            snitchedPieces.insert(move.pieceIdx);
+        }
+    }
+    return snitchedPieces;
+}
+
+PksDMoveSet PksSnitcher::getOptimalMoves() const {
+    return optimalMoves;
+}
+
 PksDMoveSet PksSnitcher::getOptimalCapturingMoves(const PksDMoveSet& capturingMoves) {
     PksDMoveSet possibleOptimalMoves;
     int maxTotalCaptured = 0;
@@ -49,6 +67,32 @@ PksDMoveSet PksSnitcher::getOptimalCapturingMoves(const PksDMoveSet& capturingMo
     }
 
     return possibleOptimalMoves;
+}
+
+void PksSnitcher::reportDiceUsed(const DICE_VAL diceValue, const PIECE_IDX pieceIdx) {
+    actualMoves.emplace_back(pieceIdx, diceValue);
+
+    // If the player has already used the 2 dice in this turn, then the complete move should be contained in
+    // the list of optimal moves. Otherwise, the player can be snitched.
+    if (actualMoves.size() == 2) {
+        playerCanBeSnitchedNow = !optimalMoves.contains(actualMoves);
+    } else {
+        // If this is just the first dice, then check if this move could be the first move of any optimal move.
+        // Otherwise, the player can be snitched.
+        for (const auto &moveSequence: optimalMoves) {
+            if (moveSequence[0] == actualMoves[0]) {
+                // Nothing more to do, the player cannot be snitched
+                return;
+            }
+        }
+        playerCanBeSnitchedNow = true;
+    }
+}
+
+bool PksSnitcher::isSnitchValid(const PksColor &snitchedPlayer,
+                                const std::set<PIECE_IDX> &snitchedPieces) const {
+    return snitchedPlayer == currentPlayer &&
+           std::ranges::includes(getSnitchablePieces(), snitchedPieces);
 }
 
 // Returns possible moves where at least one piece is captured
@@ -140,48 +184,4 @@ PksSnitcher::getPossibleMoves(const PksPiecesByPlayer &piecesByPlayer,
     }
 
     return possibleMoves;
-}
-
-PksColor PksSnitcher::getSnitchablePlayer() const {
-    return currentPlayer;
-}
-
-PksDMoveSet PksSnitcher::getOptimalMoves() const {
-    return optimalMoves;
-}
-
-std::set<PIECE_IDX> PksSnitcher::getSnitchablePieces() const {
-    std::set<PIECE_IDX> snitchedPieces;
-    for (const auto &moves: optimalMoves) {
-        for (const auto &move: moves) {
-            snitchedPieces.insert(move.pieceIdx);
-        }
-    }
-    return snitchedPieces;
-}
-
-void PksSnitcher::reportDiceUsed(const DICE_VAL diceValue, const PIECE_IDX pieceIdx) {
-    actualMoves.emplace_back(pieceIdx, diceValue);
-
-    // If the player has already used the 2 dice in this turn, then the complete move should be contained in
-    // the list of optimal moves. Otherwise, the player can be snitched.
-    if (actualMoves.size() == 2) {
-        playerCanBeSnitchedNow = !optimalMoves.contains(actualMoves);
-    } else {
-        // If this is just the first dice, then check if this move could be the first move of any optimal move.
-        // Otherwise, the player can be snitched.
-        for (const auto &moveSequence: optimalMoves) {
-            if (moveSequence[0] == actualMoves[0]) {
-                // Nothing more to do, the player cannot be snitched
-                return;
-            }
-        }
-        playerCanBeSnitchedNow = true;
-    }
-}
-
-bool PksSnitcher::isSnitchValid(const PksColor &snitchedPlayer,
-                                const std::set<PIECE_IDX> &snitchedPieces) const {
-    return snitchedPlayer == currentPlayer &&
-           std::ranges::includes(getSnitchablePieces(), snitchedPieces);
 }

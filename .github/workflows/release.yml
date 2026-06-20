@@ -21,15 +21,7 @@ jobs:
           cp ./build/src/libpks/liblibpks.a dist/libpks.a
           
           mkdir -p dist/include
-          SOURCE_INCLUDE_DIR=src/libpks/include/
-          cp $SOURCE_INCLUDE_DIR/PksGame.h \
-             $SOURCE_INCLUDE_DIR/PksDiceRoller.h \
-             $SOURCE_INCLUDE_DIR/PksGameState.h \
-             $SOURCE_INCLUDE_DIR/PksColor.h \
-             $SOURCE_INCLUDE_DIR/PksRollDiceResult.h \
-             $SOURCE_INCLUDE_DIR/PksSpotType.h \
-             $SOURCE_INCLUDE_DIR/PksBoardState.h \
-             dist/include
+          cp src/libpks/include/public/LibPks.h dist/include
 
           # Push new artifacts to the main branch
           git config --global user.name "${{ github.actor }}"
