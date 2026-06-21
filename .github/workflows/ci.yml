@@ -47,10 +47,15 @@ jobs:
           cmake --build build --target libpks_tests
           ./build/tests/libpks_tests
 
-      - name: Build and run sample_app
+      - name: Build and run sample_app_static
         run: |
-          cmake --build build --target sample_app
-          ./build/src/apps/sample_app
+          cmake --build build --target sample_app_static
+          ./build/src/apps/sample_app_static
+
+      - name: Build and run sample_app_dynamic
+        run: |
+          cmake --build build --target sample_app_dynamic
+          ./build/src/apps/sample_app_dynamic
 
       # Upload build artifacts so release.yml can use them
       - name: Upload build artifact
