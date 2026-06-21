@@ -32,7 +32,7 @@ jobs:
 
       - name: Copy libpks build artifacts created by ci.yml to dist folder
         run: |
-          mv dist/liblibpks.a dist/libpks.a
+          mv dist/libpks.a dist/libpks.so dist/
           cp -r src/libpks/include dist/
         
           # Push new artifacts to the main branch
