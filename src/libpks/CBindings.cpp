@@ -5,20 +5,20 @@
 #include "PksException.h"
 #include "PksGame.h"
 
-
-struct CPksDiceResult {
-    int dice1;
-    int dice2;
-    bool allDiceUsed;
-    bool error;
-};
-
 struct CPksGameSnapshot {
     int piecesByPlayer[NUM_PLAYERS * NUM_PIECES];
     int currentPlayer;
     int gameState;
+
+    // Current dice roll
+    int diceValues[2];
+    int isDiceUsable[2];
+
+    // Snitch feature. Already implemented in LibPks but still not exposed as C bindings
     //std::set<PksPieceIdx> snitchablePieces;
     //PksDMoveSet optimalMoves;
+
+    // If this field is true, callers should not attempt to access any of the other fields
     bool error;
 };
 
@@ -33,6 +33,7 @@ CPksGameSnapshot toCStruct(const PksGameSnapshot &snapshot) {
         .gameState = static_cast<int>(snapshot.gameState),
     };
 
+    // Piece positions
     int i = 0;
     for (const auto &pieces: snapshot.piecesByPlayer | std::views::values) {
         for (const auto spotIdx: pieces) {
@@ -40,30 +41,16 @@ CPksGameSnapshot toCStruct(const PksGameSnapshot &snapshot) {
         }
     }
 
+    // Dice information
+    result.diceValues[0] = snapshot.diceValues.first;
+    result.diceValues[1] = snapshot.diceValues.second;
+    result.isDiceUsable[0] = snapshot.isDiceUsable.first;
+    result.isDiceUsable[1] = snapshot.isDiceUsable.second;
+
     return result;
 }
 
-CPksDiceResult toCStruct(const PksDiceResult &diceResult) {
-    const auto [dice1, dice2] = diceResult.getDice();
-    return {
-        .dice1 = dice1,
-        .dice2 = dice2,
-        .allDiceUsed = diceResult.allDiceUsed(),
-    };
-}
-
 CPksGameSnapshot PksExecuteHandlingErrors(const std::function<PksGameSnapshot()> &func) {
-    try {
-        return toCStruct(func());
-    } catch (PksException &e) {
-        pksLogCallback(e.what());
-        return {
-            .error = true,
-        };
-    }
-}
-
-CPksDiceResult PksExecuteHandlingErrors(const std::function<PksDiceResult()> &func) {
     try {
         return toCStruct(func());
     } catch (PksException &e) {
@@ -88,9 +75,10 @@ void PksGameDestroy() {
 }
 
 // Invoked to roll 2 random dice
-CPksDiceResult PksGameRollDice() {
+CPksGameSnapshot PksGameRollDice() {
     return PksExecuteHandlingErrors([]() {
-        return pksGame->rollDice();
+        pksGame->rollDice();
+        return pksGame->getGameSnapshot();
     });
 }
 

@@ -12,6 +12,12 @@ struct PksGameSnapshot {
     PksPiecesByPlayer piecesByPlayer;
     PksColor currentPlayer = PksColor::Yellow;
     PksGameState gameState = PksGameState::GameNotStarted;
+
+    // Current dice roll
+    PksDicePair diceValues;
+    std::pair<bool, bool> isDiceUsable;
+
+    // Snitch feature
     std::set<PksPieceIdx> snitchablePieces;
     PksDMoveSet optimalMoves;
 };

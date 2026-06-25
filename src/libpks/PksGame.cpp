@@ -151,10 +151,23 @@ bool PksGame::snitchOnPlayer(const PksColor &snitched, const std::set<PksPieceId
 }
 
 PksGameSnapshot PksGame::getGameSnapshot() const {
+    PksDicePair diceValues{-1, -1};
+    std::pair<bool, bool> isDiceUsable;
+
+    if (lastRollDiceResult) {
+        diceValues = lastRollDiceResult->getDice();
+        isDiceUsable.first = !lastRollDiceResult->isDiceAlreadyUsed(diceValues.first);
+        isDiceUsable.second = !lastRollDiceResult->isDiceAlreadyUsed(diceValues.second);
+    }
+
     return {
         .piecesByPlayer = gameBoard.getPieces(),
         .currentPlayer = *currentPlayer,
         .gameState = gameState,
+        // Current dice roll
+        .diceValues = diceValues,
+        .isDiceUsable = isDiceUsable,
+        // Snitch feature
         .snitchablePieces = snitcher ? snitcher->getSnitchablePieces() : std::set<PksPieceIdx>{},
         .optimalMoves = snitcher ? snitcher->getOptimalMoves() : PksDMoveSet{},
     };
