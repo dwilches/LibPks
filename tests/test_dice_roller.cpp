@@ -274,3 +274,32 @@ TEST_CASE("Can't use a valid dice on a piece that is not in play") {
     REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Yellow] == std::vector{0, HOME_SPOT, 0, FINAL_TARGET_SPOT});
     REQUIRE(gameSnapshot.currentPlayer == PksColor::Yellow);
 }
+
+TEST_CASE("Can't use a dice that was already used") {
+    auto mockDiceRoller = std::make_shared<MockDiceRoller>();
+    PksGame game{mockDiceRoller};
+
+    // The current player is not at Home
+    PksGameSnapshot initialBoard = {
+        .piecesByPlayer = {
+            {PksColor::Yellow, {0, HOME_SPOT, 0, FINAL_TARGET_SPOT}},
+            {PksColor::Red, {-1, -1, -1, -1}},
+            {PksColor::Green, {-1, -1, -1, -1}},
+            {PksColor::Blue, {-1, -1, -1, -1}},
+        },
+        .currentPlayer = PksColor::Yellow,
+    };
+    auto gameSnapshot = game.start(initialBoard);
+    REQUIRE(gameSnapshot.currentPlayer == PksColor::Yellow);
+
+    // Roll a "random" dice
+    mockDiceRoller->setNextRandomValues(2, 3);
+    game.rollDice();
+    gameSnapshot = game.useDice(2, 0);
+    REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Yellow] == std::vector{2, HOME_SPOT, 0, FINAL_TARGET_SPOT});
+
+    // Try to use the same dice again, it should fail
+    REQUIRE_THROWS(game.useDice(2, 0));
+    gameSnapshot = game.getGameSnapshot();
+    REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Yellow] == std::vector{2, HOME_SPOT, 0, FINAL_TARGET_SPOT});
+}

@@ -118,6 +118,9 @@ PksGameSnapshot PksGame::useDice(const PksDiceVal diceValue, const PksPieceIdx p
             "PksGame::useDice(): Attempted to move invalid piece: " + std::to_string(pieceIdx)
         };
     }
+    if (lastRollDiceResult->isDiceAlreadyUsed(diceValue)) {
+        throw PksException{"Dice with value " + std::to_string(diceValue) + " has already been used."};
+    }
 
     moveCurrentPlayerPiece(pieceIdx, diceValue);
     lastRollDiceResult->markDiceAsUsed(diceValue);
@@ -162,7 +165,7 @@ bool PksGame::moveCurrentPlayerPiece(const PksPieceIdx pieceIdx, const int numSp
     const int currentSpotIdx = gameBoard.getSpotForPiece(*currentPlayer, pieceIdx);
     if (currentSpotIdx == FINAL_TARGET_SPOT || currentSpotIdx == HOME_SPOT) {
         throw PksException{
-            "PksGame::moveCurrentPlayerPiece(): Attempted to move a piece that is out of play: " +
+            "PksGame::moveCurrentPlayerPiece(): Attempted to move a piece that is home or out of play: " +
             std::to_string(pieceIdx)
         };
     }

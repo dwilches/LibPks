@@ -7,7 +7,8 @@ set(SOURCES
         PksUtils.cpp
         PksDiceResult.cpp
         PksSnitcher.cpp
-        PksLogUtils.cpp)
+        PksLogUtils.cpp
+        CBindings.cpp)
 
 # Generate a static library
 add_library(libpks STATIC ${SOURCES})

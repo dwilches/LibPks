@@ -28,6 +28,9 @@ public:
     // An example is when a non-doubles is rolled and the player has all pieces at home.
     void setDiceCannotBeUsed();
 
+    // Returns true if there is no unused dice with the given value.
+    [[nodiscard]] bool isDiceAlreadyUsed(PksDiceVal diceValue) const;
+
     // Marks a single dice as used (e.g. when a player uses a dice's value to move a piece(.)
     void markDiceAsUsed(PksDiceVal);
 };
