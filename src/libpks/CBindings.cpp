@@ -28,10 +28,10 @@ static CPksLogCallback pksLogCallback;
 PksGame *pksGame;
 
 CPksGameSnapshot toCStruct(const PksGameSnapshot &snapshot) {
-    auto result = CPksGameSnapshot{
-        .currentPlayer = static_cast<int>(snapshot.currentPlayer),
-        .gameState = static_cast<int>(snapshot.gameState),
-    };
+    CPksGameSnapshot result{};
+
+    result.currentPlayer = static_cast<int>(snapshot.currentPlayer);
+    result.gameState = static_cast<int>(snapshot.gameState);
 
     // Piece positions
     int i = 0;
@@ -53,18 +53,19 @@ CPksGameSnapshot toCStruct(const PksGameSnapshot &snapshot) {
 CPksGameSnapshot PksExecuteHandlingErrors(const std::function<PksGameSnapshot()> &func) {
     try {
         return toCStruct(func());
-    } catch (PksException &e) {
+    } catch (const PksException &e) {
         pksLogCallback(e.what());
-        return {
-            .error = true,
-        };
+
+        CPksGameSnapshot errorResult{};
+        errorResult.error = true;
+        return errorResult;
     }
 }
 
 extern "C" {
 // To cleanup resources created by these C-bindings, the user nees to invoke PksGameDestroy when it's done wiht libpks.
 CPksGameSnapshot PksGameCreate() {
-    return PksExecuteHandlingErrors([]() {
+    return PksExecuteHandlingErrors([] {
         pksGame = new PksGame;
         return pksGame->start();
     });
@@ -72,11 +73,12 @@ CPksGameSnapshot PksGameCreate() {
 
 void PksGameDestroy() {
     delete pksGame;
+    pksGame = nullptr;
 }
 
 // Invoked to roll 2 random dice
 CPksGameSnapshot PksGameRollDice() {
-    return PksExecuteHandlingErrors([]() {
+    return PksExecuteHandlingErrors([] {
         pksGame->rollDice();
         return pksGame->getGameSnapshot();
     });
@@ -85,7 +87,7 @@ CPksGameSnapshot PksGameRollDice() {
 // Moves a piece of the current player a certain number of spots
 CPksGameSnapshot PksGameUseDice(const PksDiceVal diceVal,
                                 const PksPieceIdx pieceIdx) {
-    return PksExecuteHandlingErrors([diceVal, pieceIdx]() {
+    return PksExecuteHandlingErrors([diceVal, pieceIdx] {
         return pksGame->useDice(diceVal, pieceIdx);
     });
 }
@@ -93,7 +95,7 @@ CPksGameSnapshot PksGameUseDice(const PksDiceVal diceVal,
 // Returns the current location of every piece of the game, as well as whether the game has finished and who the
 // current player is.
 CPksGameSnapshot PksGetGameSnapshot() {
-    return PksExecuteHandlingErrors([]() {
+    return PksExecuteHandlingErrors([] {
         return pksGame->getGameSnapshot();
     });
 }
