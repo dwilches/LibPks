@@ -1,3 +1,4 @@
+#include <format>
 #include <functional>
 #include <ranges>
 
@@ -59,6 +60,18 @@ CPksGameSnapshot PksExecuteHandlingErrors(const std::function<PksGameSnapshot()>
         CPksGameSnapshot errorResult{};
         errorResult.error = true;
         return errorResult;
+    } catch (const std::exception &e) {
+        pksLogCallback(std::format("Caught a non-PKS exception: {}", e.what()).c_str());
+
+        CPksGameSnapshot errorResult{};
+        errorResult.error = true;
+        return errorResult;
+    } catch (...) {
+        pksLogCallback("Captured an unknown non-PKS exception.");
+
+        CPksGameSnapshot errorResult{};
+        errorResult.error = true;
+        return errorResult;
     }
 }
 
@@ -79,6 +92,9 @@ void PksGameDestroy() {
 // Invoked to roll 2 random dice
 CPksGameSnapshot PksGameRollDice() {
     return PksExecuteHandlingErrors([] {
+        if (!pksGame) {
+            throw PksException("Game not started");
+        }
         pksGame->rollDice();
         return pksGame->getGameSnapshot();
     });
@@ -88,6 +104,9 @@ CPksGameSnapshot PksGameRollDice() {
 CPksGameSnapshot PksGameUseDice(const PksDiceVal diceVal,
                                 const PksPieceIdx pieceIdx) {
     return PksExecuteHandlingErrors([diceVal, pieceIdx] {
+        if (!pksGame) {
+            throw PksException("Game not started");
+        }
         return pksGame->useDice(diceVal, pieceIdx);
     });
 }
@@ -96,6 +115,9 @@ CPksGameSnapshot PksGameUseDice(const PksDiceVal diceVal,
 // current player is.
 CPksGameSnapshot PksGetGameSnapshot() {
     return PksExecuteHandlingErrors([] {
+        if (!pksGame) {
+            throw PksException("Game not started");
+        }
         return pksGame->getGameSnapshot();
     });
 }
