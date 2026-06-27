@@ -45,7 +45,7 @@ PksGameSnapshot PksGame::start(const PksGameSnapshot &gameSnapshot) {
     return getGameSnapshot();
 }
 
-PksDiceResult PksGame::rollDice() {
+PksGameSnapshot PksGame::rollDice() {
     validateGameInCourse("PksGame::rollDice()");
 
     // Only roll the dice again if the previous one was already used
@@ -101,7 +101,7 @@ PksDiceResult PksGame::rollDice() {
     }
 
     // Return a copy of the dice result (we don't want the user to tamper with our library's internals)
-    return *lastRollDiceResult;
+    return getGameSnapshot();
 }
 
 void PksGame::nextPlayer() {

@@ -5,6 +5,9 @@
 #include "PksGame.h"
 #include "src/TestBoards.h"
 
+bool allDiceUsed(const PksGameSnapshot& snapshot) {
+    return !snapshot.isDiceUsable.first && !snapshot.isDiceUsable.second;
+}
 
 TEST_CASE("Can roll and use dice (when not at home)") {
     auto mockDiceRoller = std::make_shared<MockDiceRoller>();
@@ -20,9 +23,9 @@ TEST_CASE("Can roll and use dice (when not at home)") {
 
     // Roll a "random" dice
     mockDiceRoller->setNextRandomValues(2, 3);
-    auto diceRoll = game.rollDice();
-    REQUIRE(!diceRoll.allDiceUsed());
-    REQUIRE(diceRoll.getDice() == std::pair{2, 3});
+    gameSnapshot = game.rollDice();
+    REQUIRE(!allDiceUsed(gameSnapshot));
+    REQUIRE(gameSnapshot.diceValues == std::pair{2, 3});
 
     // Can't roll dice again until we use them
     CHECK_THROWS(game.rollDice());
@@ -53,24 +56,24 @@ TEST_CASE("Can't get out of home without doubles") {
 
     // Roll a "random" dice
     mockDiceRoller->setNextRandomValues(2, 3);
-    auto diceRoll = game.rollDice();
-    REQUIRE(diceRoll.allDiceUsed()); // can't use this roll as it's not doubles
-    REQUIRE(diceRoll.getDice() == std::pair{2, 3});
+    gameSnapshot = game.rollDice();
+    REQUIRE(allDiceUsed(gameSnapshot)); // can't use this roll as it's not doubles
+    REQUIRE(gameSnapshot.diceValues == std::pair{2, 3});
 
     // Second chance
     mockDiceRoller->setNextRandomValues(2, 1);
-    diceRoll = game.rollDice();
-    REQUIRE(diceRoll.allDiceUsed()); // can't use this roll as it's not doubles
-    REQUIRE(diceRoll.getDice() == std::pair{2, 1});
+    gameSnapshot = game.rollDice();
+    REQUIRE(allDiceUsed(gameSnapshot)); // can't use this roll as it's not doubles
+    REQUIRE(gameSnapshot.diceValues == std::pair{2, 1});
 
     // Last chance
     mockDiceRoller->setNextRandomValues(6, 5);
-    diceRoll = game.rollDice();
-    REQUIRE(diceRoll.allDiceUsed()); // can't use this roll as it's not doubles
-    REQUIRE(diceRoll.getDice() == std::pair{6, 5});
+    gameSnapshot = game.rollDice();
+    REQUIRE(allDiceUsed(gameSnapshot)); // can't use this roll as it's not doubles
+    REQUIRE(gameSnapshot.diceValues == std::pair{6, 5});
 
     // The player failed to get out of Home, next player's turn
-    REQUIRE(game.getGameSnapshot().currentPlayer == PksColor::Red);
+    REQUIRE(gameSnapshot.currentPlayer == PksColor::Red);
 }
 
 TEST_CASE("Can get out of home with doubles (all pieces at home)") {
@@ -87,12 +90,12 @@ TEST_CASE("Can get out of home with doubles (all pieces at home)") {
 
     // Roll a "random" dice
     mockDiceRoller->setNextRandomValues(2, 2);
-    auto diceRoll = game.rollDice();
-    REQUIRE(diceRoll.allDiceUsed()); // used to get out of home
-    REQUIRE(diceRoll.getDice() == std::pair{2, 2});
+    gameSnapshot = game.rollDice();
+    REQUIRE(allDiceUsed(gameSnapshot)); // used to get out of home
+    REQUIRE(gameSnapshot.diceValues == std::pair{2, 2});
 
     // Now is next player's turn
-    REQUIRE(game.getGameSnapshot().currentPlayer == PksColor::Red);
+    REQUIRE(gameSnapshot.currentPlayer == PksColor::Red);
 }
 
 TEST_CASE("Can get out of home with doubles (only some pieces at home)") {
@@ -113,11 +116,10 @@ TEST_CASE("Can get out of home with doubles (only some pieces at home)") {
 
     // Roll a "random" dice
     mockDiceRoller->setNextRandomValues(2, 2);
-    auto diceRoll = game.rollDice();
-    REQUIRE(diceRoll.allDiceUsed()); // used to get out of home
-    REQUIRE(diceRoll.getDice() == std::pair{2, 2});
+    gameSnapshot = game.rollDice();
+    REQUIRE(allDiceUsed(gameSnapshot)); // used to get out of home
+    REQUIRE(gameSnapshot.diceValues == std::pair{2, 2});
 
-    gameSnapshot = game.getGameSnapshot();
     REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Green] == std::vector{1, 0, 1, 1}); // got out of home
 
     // Next player's turn
@@ -137,9 +139,9 @@ TEST_CASE("Can roll doubles (when not at home)") {
 
     // Roll a "random" dice
     mockDiceRoller->setNextRandomValues(4, 4);
-    auto diceRoll = game.rollDice();
-    REQUIRE(!diceRoll.allDiceUsed());
-    REQUIRE(diceRoll.getDice() == std::pair{4, 4});
+    gameSnapshot = game.rollDice();
+    REQUIRE(!allDiceUsed(gameSnapshot));
+    REQUIRE(gameSnapshot.diceValues == std::pair{4, 4});
 
     // Can't roll dice again until we use them
     CHECK_THROWS(game.rollDice());
@@ -170,9 +172,9 @@ TEST_CASE("Can roll doubles twice in a row") {
 
     // Roll a "random" dice
     mockDiceRoller->setNextRandomValues(1, 1);
-    auto diceRoll = game.rollDice();
-    REQUIRE(!diceRoll.allDiceUsed());
-    REQUIRE(diceRoll.getDice() == std::pair{1, 1});
+    gameSnapshot = game.rollDice();
+    REQUIRE(!allDiceUsed(gameSnapshot));
+    REQUIRE(gameSnapshot.diceValues == std::pair{1, 1});
 
     // Use them both
     gameSnapshot = game.useDice(1, 0);
@@ -182,9 +184,9 @@ TEST_CASE("Can roll doubles twice in a row") {
 
     // Roll more doubles and use them
     mockDiceRoller->setNextRandomValues(2, 2);
-    diceRoll = game.rollDice();
-    REQUIRE(!diceRoll.allDiceUsed());
-    REQUIRE(diceRoll.getDice() == std::pair{2, 2});
+    gameSnapshot = game.rollDice();
+    REQUIRE(!allDiceUsed(gameSnapshot));
+    REQUIRE(gameSnapshot.diceValues == std::pair{2, 2});
 
     gameSnapshot = game.useDice(2, 0);
     REQUIRE(gameSnapshot.currentPlayer == PksColor::Yellow);
@@ -193,9 +195,9 @@ TEST_CASE("Can roll doubles twice in a row") {
 
     // Roll dice one last time, it's not doubles this time
     mockDiceRoller->setNextRandomValues(3, 1);
-    diceRoll = game.rollDice();
-    REQUIRE(!diceRoll.allDiceUsed());
-    REQUIRE(diceRoll.getDice() == std::pair{3, 1});
+    gameSnapshot = game.rollDice();
+    REQUIRE(!allDiceUsed(gameSnapshot));
+    REQUIRE(gameSnapshot.diceValues == std::pair{3, 1});
 
     gameSnapshot = game.useDice(3, 0);
     REQUIRE(gameSnapshot.currentPlayer == PksColor::Yellow);
@@ -235,11 +237,10 @@ TEST_CASE("Three consecutive doubles send all playing pieces homes") {
     // Roll doubles one last time, this causes all the player's pieces to be sent home, except those that are already
     // out of play
     mockDiceRoller->setNextRandomValues(3, 3);
-    auto diceRoll = game.rollDice();
-    REQUIRE(diceRoll.allDiceUsed()); // can't use this dice roll
+    gameSnapshot = game.rollDice();
+    REQUIRE(allDiceUsed(gameSnapshot)); // can't use this dice roll
 
     // Only the pieces that were in play are sent home
-    gameSnapshot = game.getGameSnapshot();
     // The piece that was out of play  is untouched
     REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Yellow] ==
             std::vector{HOME_SPOT, HOME_SPOT, FINAL_TARGET_SPOT, HOME_SPOT});
@@ -265,12 +266,11 @@ TEST_CASE("Can't use a valid dice on a piece that is not in play") {
 
     // Roll a "random" dice
     mockDiceRoller->setNextRandomValues(2, 3);
-    game.rollDice();
+    gameSnapshot = game.rollDice();
     REQUIRE_THROWS(game.useDice(2, 1)); // Piece at home
     REQUIRE_THROWS(game.useDice(2, 3)); // Piece already out of play
 
     // Board should be identical
-    gameSnapshot = game.getGameSnapshot();
     REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Yellow] == std::vector{0, HOME_SPOT, 0, FINAL_TARGET_SPOT});
     REQUIRE(gameSnapshot.currentPlayer == PksColor::Yellow);
 }
@@ -300,6 +300,5 @@ TEST_CASE("Can't use a dice that was already used") {
 
     // Try to use the same dice again, it should fail
     REQUIRE_THROWS(game.useDice(2, 0));
-    gameSnapshot = game.getGameSnapshot();
     REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Yellow] == std::vector{2, HOME_SPOT, 0, FINAL_TARGET_SPOT});
 }

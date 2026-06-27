@@ -19,11 +19,10 @@ TEST_CASE("All pieces move out of home") {
 
     // Roll doubles to get out of home
     mockDiceRoller->setNextRandomValues(6, 6);
-    auto diceRoll = game.rollDice();
-    REQUIRE(diceRoll.allDiceUsed()); // used to get out of home
-    REQUIRE(diceRoll.getDice() == PksDicePair{6, 6});
+    gameSnapshot = game.rollDice();
+    REQUIRE((!gameSnapshot.isDiceUsable.first && !gameSnapshot.isDiceUsable.second)); // used to get out of home
+    REQUIRE(gameSnapshot.diceValues == PksDicePair{6, 6});
 
-    gameSnapshot = game.getGameSnapshot();
     REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Yellow] == std::vector{0, 0, 0, 0}); // all at start
     REQUIRE(gameSnapshot.currentPlayer == PksColor::Red); // Next player's turn
     REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Red] == std::vector{-1, -1, -1, -1}); // Next player is still at home
@@ -49,9 +48,8 @@ TEST_CASE("Pieces move according to dice value (same piece moves both dice)") {
 
     // Roll a dice and ensure the pieces move the desired amounts
     mockDiceRoller->setNextRandomValues(6, 3);
-    game.rollDice();
+    gameSnapshot = game.rollDice();
 
-    gameSnapshot = game.getGameSnapshot();
     REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Yellow] == std::vector{0, 10, 20, 30});
 
     gameSnapshot = game.useDice(6, 1); // Should move from 10 to 16
@@ -80,13 +78,11 @@ TEST_CASE("Pieces move according to dice value (different pieces move)") {
     };
     auto gameSnapshot = game.start(initialBoard);
     REQUIRE(gameSnapshot.currentPlayer == PksColor::Yellow);
-    REQUIRE(game.getGameSnapshot().piecesByPlayer[PksColor::Yellow] == std::vector{0, 10, 20, 30});
+    REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Yellow] == std::vector{0, 10, 20, 30});
 
     // Roll a dice and ensure the pieces move the desired amounts
     mockDiceRoller->setNextRandomValues(6, 3);
-    game.rollDice();
-
-    gameSnapshot = game.getGameSnapshot();
+    gameSnapshot = game.rollDice();
     REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Yellow] == std::vector{0, 10, 20, 30});
 
     gameSnapshot = game.useDice(6, 2); // Should move from 20 to 26
@@ -115,7 +111,7 @@ TEST_CASE("Pieces move according to dice value (doubles test)") {
     };
     auto gameSnapshot = game.start(initialBoard);
     REQUIRE(gameSnapshot.currentPlayer == PksColor::Yellow);
-    REQUIRE(game.getGameSnapshot().piecesByPlayer[PksColor::Yellow] == std::vector{0, 10, 20, 30});
+    REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Yellow] == std::vector{0, 10, 20, 30});
 
     // Roll a dice and ensure the pieces move the desired amounts
     mockDiceRoller->setNextRandomValues(6, 6);

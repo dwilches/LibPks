@@ -21,15 +21,13 @@ TEST_CASE("Can snitch if first dice wasted") {
     auto gameSnapshot = game.start(initialBoard);
 
     mockDiceRoller->setNextRandomValues(2, 4);
-    game.rollDice();
+    gameSnapshot = game.rollDice();
 
     // Ensure the optimal moves are as we expect
-    gameSnapshot = game.getGameSnapshot();
     REQUIRE(gameSnapshot.optimalMoves == PksDMoveSet{
             { {1, 4, 1} },
             });
 
-    gameSnapshot = game.getGameSnapshot();
     REQUIRE(gameSnapshot.snitchablePieces.empty()); // not snitchable yet, Red can still attack
     REQUIRE(!game.snitchOnPlayer(PksColor::Red, {1})); // can't snitch yet
 
@@ -61,10 +59,9 @@ TEST_CASE("Can snitch if second dice wasted") {
     auto gameSnapshot = game.start(initialBoard);
 
     mockDiceRoller->setNextRandomValues(2, 4);
-    game.rollDice();
+    gameSnapshot = game.rollDice();
 
     // Ensure the optimal moves are as we expect
-    gameSnapshot = game.getGameSnapshot();
     REQUIRE(gameSnapshot.optimalMoves == PksDMoveSet{
             { {1, 4, 1} },
             });
@@ -100,10 +97,9 @@ TEST_CASE("Can snitch if first dice wasted and both dice were required (2 pieces
     auto gameSnapshot = game.start(initialBoard);
 
     mockDiceRoller->setNextRandomValues(1, 2);
-    game.rollDice();
+    gameSnapshot = game.rollDice();
 
     // Ensure the optimal moves are as we expect
-    gameSnapshot = game.getGameSnapshot();
     REQUIRE(gameSnapshot.optimalMoves == PksDMoveSet{
             { {0, 1, 1}, {3, 2, 1}},
             { {0, 2, 1}, {3, 1, 1}},
@@ -139,10 +135,9 @@ TEST_CASE("Can snitch if first dice used ok but second dice wasted") {
 
     // Optimal play is: [{P0, D1}, {P0, D2}]
     mockDiceRoller->setNextRandomValues(1, 2);
-    game.rollDice();
+    gameSnapshot = game.rollDice();
 
     // Ensure the optimal moves are as we expect
-    gameSnapshot = game.getGameSnapshot();
     REQUIRE(gameSnapshot.optimalMoves == PksDMoveSet{
             { {0, 1, 1}, {3, 2, 1}},
             { {0, 2, 1}, {3, 1, 1}},
@@ -183,10 +178,9 @@ TEST_CASE("Can only snitch before next dice roll") {
     auto gameSnapshot = game.start(initialBoard);
 
     mockDiceRoller->setNextRandomValues(2, 4);
-    game.rollDice();
+    gameSnapshot = game.rollDice();
 
     // Ensure the optimal moves are as we expect
-    gameSnapshot = game.getGameSnapshot();
     REQUIRE(gameSnapshot.optimalMoves == PksDMoveSet{
             { {1, 4, 1} },
             });

@@ -95,8 +95,7 @@ CPksGameSnapshot PksGameRollDice() {
         if (!pksGame) {
             throw PksException("Game not started");
         }
-        pksGame->rollDice();
-        return pksGame->getGameSnapshot();
+        return pksGame->rollDice();
     });
 }
 

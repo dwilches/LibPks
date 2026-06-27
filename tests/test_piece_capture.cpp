@@ -156,10 +156,9 @@ TEST_CASE("When going out of Home, capture foreign pieces currently at our Home"
 
     // Roll doubles to get out of home
     mockDiceRoller->setNextRandomValues(2, 2);
-    game.rollDice();
+    gameSnapshot = game.rollDice();
 
     // All pieces at our home should have been captured
-    gameSnapshot = game.getGameSnapshot();
     REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Yellow] == std::vector{0, 0, 0, 0}); // piece got out of home
     REQUIRE(gameSnapshot.piecesByPlayer[PksColor::Red] == std::vector{HOME_SPOT, 0, 0, 0}); // foreign piece sent home
 }

@@ -55,7 +55,7 @@ public:
     PksGameSnapshot start(const PksGameSnapshot &);
 
     // Invoked to roll 2 random dice
-    PksDiceResult rollDice();
+    PksGameSnapshot rollDice();
 
     // Moves a piece of the current player a certain number of spots
     PksGameSnapshot useDice(PksDiceVal, PksPieceIdx);
